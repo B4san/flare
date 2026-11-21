@@ -1,0 +1,326 @@
+@import "tailwindcss";
+@import "./components/vendor/agent-elements/agent-ui.css";
+
+/* Flare es dark-only: la variante `dark:` de Tailwind v4 por defecto es
+   `prefers-color-scheme` (el SO del visitante). Con esta variante por clase,
+   `dark:` se aplica siempre que <html> lleve class="dark" (ver index.html
+   y main.tsx), sin importar el modo claro/oscuro del SO. Sin esto, en modo
+   claro los vendored renderizan su rama clara (negro sobre #0A0A0F). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============ Flare — tokens (ÚNICA armonía visual) ============
+   Misma paleta/tipografía que web/tokens.css de la versión vanilla:
+   fondo #0A0A0F, degradado flare ámbar → coral → violeta, Space Grotesk
+   display + Inter cuerpo + JetBrains Mono solo código. Cada componente
+   instalado (Magic UI, Aceternity, Motion Primitives, Agent Elements,
+   React Bits) se re-tiñe a estos tokens; nada de arcoíris por componente. */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/Inter-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/SpaceGrotesk-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/fonts/JetBrainsMono-var.woff2') format('woff2');
+}
+
+@theme {
+  /* Paleta Flare */
+  --color-bg: #0a0a0f;
+  --color-surface: #12121a;
+  --color-elevated: #1a1a26;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+  --color-text: #f5f5f2;
+  --color-text-secondary: #9a9aa8;
+  --color-text-muted: #82828f;
+  --color-flare-1: #ffb020;
+  --color-flare-2: #ff5a3c;
+  --color-flare-3: #8b5cf6;
+  --color-success: #34d399;
+  --color-danger: #fb7185;
+  --color-warning: #fbbf24;
+
+  /* Tokens semánticos shadcn (mapeados a Flare, dark-only) */
+  --color-background: #0a0a0f;
+  --color-foreground: #f5f5f2;
+  --color-card: #12121a;
+  --color-card-foreground: #f5f5f2;
+  --color-popover: #1a1a26;
+  --color-popover-foreground: #f5f5f2;
+  --color-primary: #ff5a3c;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1a1a26;
+  --color-secondary-foreground: #f5f5f2;
+  --color-muted: #12121a;
+  --color-muted-foreground: #9a9aa8;
+  --color-accent: #1a1a26;
+  --color-accent-foreground: #f5f5f2;
+  --color-destructive: #fb7185;
+  --color-destructive-foreground: #ffffff;
+  --color-input: rgba(255, 255, 255, 0.14);
+  --color-ring: #8b5cf6;
+
+  /* Tipografía */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Radios Flare */
+  --radius-sm: 16px;
+  --radius-md: 18px;
+  --radius-lg: 20px;
+
+  /* Keyframes de Magic UI / Aceternity (definidos una sola vez aquí) */
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-vertical: marquee-vertical 40s linear infinite;
+  --animate-spin-around: spin-around 4s linear infinite;
+  --animate-shimmer-slide: shimmer-slide 2.5s ease-in-out infinite alternate;
+  --animate-shine: shine 3s linear infinite;
+  --animate-shiny-text: shiny-text 8s infinite;
+  --animate-gradient: gradient 6s ease infinite;
+  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
+  --animate-an-blink: an-blink 1s step-end infinite;
+  --animate-fade-in: fade-in 0.5s ease forwards;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-100% - var(--gap))); }
+  }
+  @keyframes marquee-vertical {
+    from { transform: translateY(0); }
+    to { transform: translateY(calc(-100% - var(--gap))); }
+  }
+  @keyframes spin-around {
+    0% { transform: translateZ(0) rotate(0); }
+    15%, 35% { transform: translateZ(0) rotate(90deg); }
+    65%, 85% { transform: translateZ(0) rotate(270deg); }
+    100% { transform: translateZ(0) rotate(360deg); }
+  }
+  @keyframes shimmer-slide {
+    to { transform: translate(calc(100cqw - 100%), 0); }
+  }
+  @keyframes shine {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    to { background-position: 0% 0%; }
+  }
+  @keyframes shiny-text {
+    0%, 90%, 100% { background-position: calc(-100% - var(--shiny-width)) 0; }
+    30%, 60% { background-position: calc(100% + var(--shiny-width)) 0; }
+  }
+  @keyframes gradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes spotlight {
+    0% { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
+    100% { opacity: 1; transform: translate(-50%, -40%) scale(1); }
+  }
+  @keyframes an-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+:root {
+  color-scheme: dark;
+  /* Agent Elements re-teñido a Flare — TODAS sus vars, no solo 10:
+     sus defaults claros viven en agent-ui.css (:root y .dark); como este
+     bloque viene después del @import, gana en la cascada. */
+  --an-background: #12121a;
+  --an-background-secondary: #1a1a26;
+  --an-background-tertiary: #0a0a0f;
+  --an-foreground: #f5f5f2;
+  --an-foreground-muted: #9a9aa8;
+  --an-foreground-subtle: #82828f;
+  --an-border-color: rgba(255, 255, 255, 0.08);
+  --an-primary-color: #ff5a3c;
+  --an-user-message-bg: #1a1a26;
+  --an-user-message-text: #f5f5f2;
+  --an-input-background: #1a1a26;
+  --an-input-border-color: rgba(255, 255, 255, 0.14);
+  --an-input-color: #f5f5f2;
+  --an-input-placeholder-color: #82828f;
+  --an-input-focus-outline: transparent;
+  --an-send-button-bg: #ff5a3c;
+  --an-send-button-color: #ffffff;
+  --an-tool-background: #1a1a26;
+  --an-tool-border-color: rgba(255, 255, 255, 0.08);
+  --an-tool-color: #f5f5f2;
+  --an-tool-color-muted: #9a9aa8;
+  --an-code-background: #0a0a0f;
+  --an-code-color: #d4d4d4;
+  --an-diff-added-bg: rgba(52, 211, 153, 0.15);
+  --an-diff-added-border: rgba(52, 211, 153, 0.4);
+  --an-diff-added-text: #4ade80;
+  --an-diff-removed-bg: rgba(251, 113, 133, 0.15);
+  --an-diff-removed-border: rgba(251, 113, 133, 0.4);
+  --an-diff-removed-text: #fb7185;
+}
+
+/* Lenis: el scroll suave nativo solo cuando Lenis NO está activo. */
+html:not(.lenis) {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0a0a0f;
+  color: #f5f5f2;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(255, 90, 60, 0.4);
+}
+
+/* Degradado flare como texto (utilidad local, misma que tokens.css) */
+.text-flare {
+  background: linear-gradient(135deg, #ffb020, #ff5a3c 48%, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.bg-flare {
+  background: linear-gradient(135deg, #ffb020, #ff5a3c 48%, #8b5cf6);
+}
+.border-flare {
+  border-image: linear-gradient(135deg, #ffb020, #ff5a3c 48%, #8b5cf6) 1;
+}
+
+/* Scrollbar fina, estilo Apple */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============ Codrops — landing (ver CODROPS-RESEARCH.md) ============ */
+
+/* Lenis: CSS recomendado por la librería. */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* --- Hero Telescope (§8) --- */
+.t-hero { --progress: 0; --ghost: 0; }
+.t-hero-title .t-half { display: inline-block; will-change: transform; }
+/* Las palabras del H1 no se parten a mitad: SplitText 'words, chars'
+   agrupa los caracteres por palabra y el nowrap impide el corte feo
+   "dirigi / r." que se veía a 820 px. */
+.t-hero-title .st-word { display: inline-block; white-space: nowrap; }
+/* Split en 2 mitades pilotado por --progress (CSS puro, como el original).
+   La distancia es 100vw + el propio ancho de la mitad, así que a
+   --progress: 1 cada mitad está por completo fuera de pantalla (con solo
+   70vw quedaba un resto visible porque el H1 es más estrecho que el
+   viewport: max-w-4xl centrado). */
+.t-half-left { transform: translate3d(calc(var(--progress, 0) * -100vw - var(--progress, 0) * 100%), 0, 0); }
+.t-half-right { transform: translate3d(calc(var(--progress, 0) * 100vw + var(--progress, 0) * 100%), 0, 0); }
+
+/* Rejilla flotante que vuela en z (perspective 100vh, z 60vh) */
+.hero-grid { position: absolute; inset: 0; perspective: 100vh; pointer-events: none; }
+.hero-tile {
+  position: absolute;
+  width: clamp(110px, 10vw, 150px);
+  aspect-ratio: 16 / 10;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px;
+  overflow: hidden;
+}
+.hero-tile-label { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.18em; color: #F5F5F2; }
+.hero-tile-bar { margin-top: 6px; height: 3px; width: 45%; border-radius: 999px; background: rgba(255, 255, 255, 0.25); }
+@media (max-width: 768px) { .hero-tile { width: 20vw; } }
+/* A <900 px el contenido centrado (max-w-4xl) ocupa casi todo el ancho y
+   las losas de los bordes caen encima del H1 y de las stats: se oculta la
+   rejilla en móvil (el zoom del mock y el split del H1 siguen activos). */
+@media (max-width: 900px) { .hero-grid { display: none; } }
+
+/* Mock del Studio que escala 0→1 con --progress */
+.hero-media {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  height: min(78svh, 620px);
+  aspect-ratio: 9 / 16;
+  transform: translate(-50%, -50%) scale(var(--progress, 0));
+  will-change: transform;
+  pointer-events: none;
+}
+.hero-media-back, .hero-media-front { position: absolute; inset: 0; }
+/* Las capas frontales solo muestran la banda caption+CTA (máscara por
+   clip-path; el original usa mask.png con la silueta del sujeto) */
+.hero-media-front { clip-path: inset(60% 6% 4% 6%); }
+
+/* --- Tagline: estela Kinetic (§1) + cursor scramble (§2 v01) --- */
+.k-tagline {
+  background: linear-gradient(135deg, #FFB020, #FF5A3C 48%, #8B5CF6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.kchar { position: relative; display: inline-block; }
+.kchar .k-real { position: relative; z-index: 3; }
+.kchar .k-ghost { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; }
+.k-ghost.g1 { color: #FFB020; opacity: calc(var(--ghost, 0) * 0.55); transform: translate(calc(var(--ghost, 0) * 5px), calc(var(--ghost, 0) * -3px)); }
+.k-ghost.g2 { color: #FF5A3C; opacity: calc(var(--ghost, 0) * 0.4); transform: translate(calc(var(--ghost, 0) * 9px), calc(var(--ghost, 0) * -6px)); }
+.k-ghost.g3 { color: #8B5CF6; opacity: calc(var(--ghost, 0) * 0.3); transform: translate(calc(var(--ghost, 0) * 14px), calc(var(--ghost, 0) * -9px)); }
+.k-cursor {
+  /* display:none inicial: an-blink anima opacity y pisaría un opacity: 0,
+     así que el cursor parpadearía antes de que empiece el scramble.
+     scrambleSequence lo restaura (display:'') al empezar y lo oculta
+     (display:none) al terminar. */
+  display: none;
+  width: 0.45em;
+  height: 0.85em;
+  margin-left: 0.1em;
+  vertical-align: -0.1em;
+  background: #FFB020;
+  animation: an-blink 1s step-end infinite;
+}
+
+/* --- Grano sutil (§5, noise 200 px) solo sobre la landing --- */
+.codrops-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+/* --- Reduced motion: texto plano, sin pin/scramble/fantasmas --- */
+@media (prefers-reduced-motion: reduce) {
+  .hero-media, .hero-grid { display: none; }
+  .kchar .k-ghost, .k-cursor { display: none; }
+  .t-half-left, .t-half-right { transform: none; }
+}

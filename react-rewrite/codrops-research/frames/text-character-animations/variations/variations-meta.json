@@ -1,0 +1,26 @@
+{
+  "url": "http://127.0.0.1:8932/",
+  "variations": {
+    "v01": {
+      "slug": "cursor-scramble",
+      "top": 825.5625
+    },
+    "v02": {
+      "slug": "proofread",
+      "top": 1725.5625
+    },
+    "v03": {
+      "slug": "telegram",
+      "top": 2625.5625
+    },
+    "v04": {
+      "slug": "loupe",
+      "top": 3525.5625
+    },
+    "v16": {
+      "slug": "filament",
+      "top": 14325.5625
+    }
+  },
+  "consoleErrors": []
+}

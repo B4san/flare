@@ -1,0 +1,108 @@
+{
+  "keys": [
+    {
+      "name": "H1 mitad izq",
+      "sel": ".t-half-left",
+      "txt": "El comercial que",
+      "ratio": 18.08,
+      "size": "72px",
+      "weight": "700",
+      "color": "rgb(245, 245, 242)"
+    },
+    {
+      "name": "H1 mitad der",
+      "sel": ".t-half-right",
+      "txt": "tu agente puede dirigir.",
+      "ratio": 18.08,
+      "size": "72px",
+      "weight": "700",
+      "color": "rgb(245, 245, 242)"
+    },
+    {
+      "name": "Badge Dojo",
+      "sel": ".dojo-badge",
+      "txt": "DOJO AI HACKATHON 2026 — FLARE · MIT",
+      "ratio": 10.8,
+      "size": "11px",
+      "weight": "600",
+      "color": "rgb(255, 176, 32)"
+    },
+    {
+      "name": "Tagline real (1er char)",
+      "sel": ".k-real",
+      "txt": "A",
+      "note": "color transparente (degradado background-clip:text)",
+      "ratio": null
+    },
+    {
+      "name": "Subtítulo hero",
+      "sel": ".hero-fade",
+      "txt": "DOJO AI HACKATHON 2026 — FLARE · MIT",
+      "ratio": 10.8,
+      "size": "11px",
+      "weight": "600",
+      "color": "rgb(255, 176, 32)"
+    },
+    {
+      "name": "Kicker Cómo funciona",
+      "sel": "#como > p",
+      "txt": "Cómo funciona",
+      "ratio": 10.8,
+      "size": "11px",
+      "weight": "400",
+      "color": "rgb(255, 176, 32)"
+    },
+    {
+      "name": "H2 Cómo funciona",
+      "sel": "#como > h2",
+      "txt": "Del brief al vídeo en tres pasos",
+      "ratio": 18.08,
+      "size": "36px",
+      "weight": "700",
+      "color": "rgb(245, 245, 242)"
+    },
+    {
+      "name": "Paso Brief label",
+      "sel": "#como .step-word:nth-child(1) p",
+      "txt": "Paso 1 · El punto de partida",
+      "ratio": 10.8,
+      "size": "11px",
+      "weight": "400",
+      "color": "rgb(255, 176, 32)"
+    },
+    {
+      "name": "Paso Brief palabra",
+      "sel": "#como .step-word:nth-child(1) p:nth-child(2)",
+      "txt": "Brief",
+      "ratio": 19.75,
+      "size": "144px",
+      "weight": "700",
+      "color": "rgb(255, 255, 255)"
+    },
+    {
+      "name": "Paso Brief desc",
+      "sel": "#como .step-word:nth-child(1) p:nth-child(3)",
+      "txt": "Describe el producto o elige una plantil",
+      "ratio": 7.11,
+      "size": "16px",
+      "weight": "400",
+      "color": "rgb(154, 154, 168)"
+    },
+    {
+      "name": "Stats label",
+      "sel": ".hero-content .text-\\[\\#9A9AA8\\]",
+      "txt": "Flare es un estudio agent-native: tu age",
+      "ratio": 7.11,
+      "size": "18px",
+      "weight": "400",
+      "color": "rgb(154, 154, 168)"
+    }
+  ],
+  "worst": {
+    "ratio": 4.91,
+    "txt": "6 escenas · Un colchón ficticio: dormir bien sin pagar de má",
+    "size": 12,
+    "min": 4.5,
+    "tag": "P"
+  }
+}

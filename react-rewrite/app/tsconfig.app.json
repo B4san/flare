@@ -1,0 +1,49 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  // Archivos del catálogo vendored que esta app NO importa: quedan fuera del
+  // chequeo de tipos (algunos necesitan @react-three/fiber o APIs de Motion
+  // incompatibles con React 19; no forman parte del build). Los componentes
+  // usados sí se chequean.
+  "exclude": [
+    "src/components/vendor/aceternity/components/ui/canvas-reveal-effect.tsx",
+    "src/components/vendor/aceternity/components/ui/card-spotlight.tsx",
+    "src/components/vendor/aceternity/components/ui/background-beams.tsx",
+    "src/components/vendor/aceternity/components/ui/spotlight.tsx",
+    "src/components/vendor/motion-primitives/animated-group.tsx",
+    "src/components/vendor/motion-primitives/animated-number.tsx",
+    "src/components/vendor/motion-primitives/border-trail.tsx",
+    "src/components/vendor/motion-primitives/dialog.tsx",
+    "src/components/vendor/motion-primitives/in-view.tsx",
+    "src/components/vendor/motion-primitives/spotlight.tsx",
+    "src/components/vendor/motion-primitives/text-morph.tsx",
+    "src/components/vendor/motion-primitives/tilt.tsx",
+    "src/components/vendor/motion-primitives/hooks/useClickOutside.tsx"
+  ]
+}
