@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080">
+<title>Flare fixture — Café Nómada</title>
+<!--
+  Flare test fixture: 9:16 vertical ad, 3s total, 2 scenes + CTA.
+  Format contract (see renderer/README.md):
+  - composition root: <body data-composition-id data-width data-height data-duration>
+  - scenes:   elements with data-scene data-start data-duration data-bg
+  - clips:    elements with data-clip  (here the scenes double as clips)
+  - captions: elements with data-caption data-start data-duration
+  - CTA:      element with data-cta data-start data-duration, visible in last 3s
+  - ?t=SECONDS: the renderer loads scenes.html?t=<t> per frame; this page
+    honours ?t= by showing only the scene containing t (deterministic,
+    no wall-clock animation timing involved).
+  NOTE on the score: the 2 scenes last 1.5s each, so the "cuts 2-4s" rule
+  (20 pts) fails on purpose for a 3s fixture — a 3s ad cannot have 2-4s
+  cuts. Expected score: 80/100 (hook 30 + captions 25 + cuts 0 + CTA 15
+  + safe zones 10). That failure is the checklist working, not a bug.
+-->
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; font-family: system-ui, sans-serif; }
+  .scene { position: absolute; inset: 0; display: none; flex-direction: column;
+           align-items: center; justify-content: center; text-align: center; color: #fff; padding: 80px; }
+  .scene.active { display: flex; }
+  .scene[data-scene="escena-1"] { background: #7c2d12; animation: pulse 1s ease-in-out infinite alternate; }
+  .scene[data-scene="escena-2"] { background: #0f766e; }
+  @keyframes pulse { from { filter: brightness(1); } to { filter: brightness(1.15); } }
+  .hook { font-size: 96px; font-weight: 800; line-height: 1.05; }
+  .sub { font-size: 44px; margin-top: 24px; opacity: .9; }
+  .caption { position: absolute; left: 80px; right: 80px; top: 45%;
+             font-size: 40px; font-weight: 600; text-align: center; color: #fff;
+             text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+  .cta { position: absolute; left: 140px; right: 140px; bottom: 12%;
+         background: #f59e0b; color: #1c1005; font-size: 48px; font-weight: 800;
+         text-align: center; padding: 32px; border-radius: 999px; }
+</style>
+</head>
+<body data-composition-id="cafe-nomada-fixture" data-width="1080" data-height="1920" data-duration="3">
+  <section class="scene" data-scene="escena-1" data-start="0" data-duration="1.5" data-bg="#7c2d12">
+    <div class="hook" data-caption data-start="0" data-duration="1.5" style="font-size:96px">¿CAFÉ FRÍO<br>OTRA VEZ?</div>
+    <div class="sub">El termo que dura 24 h</div>
+  </section>
+  <section class="scene" data-scene="escena-2" data-start="1.5" data-duration="1.5" data-bg="#0f766e">
+    <div class="hook" style="font-size:72px">CAFÉ NÓMADA</div>
+    <div class="sub">Caliente hasta la última gota</div>
+    <div class="caption" data-caption data-start="1.5" data-duration="1.5" style="font-size:40px">Caliente hasta la última gota</div>
+  </section>
+  <a class="cta" data-cta data-start="1" data-duration="2" style="bottom:12%">PÍDELO HOY −20%</a>
+  <script>
+    // Deterministic seek: ?t=SECONDS shows the scene containing t.
+    var params = new URLSearchParams(location.search);
+    var t = parseFloat(params.get('t') || '0');
+    document.querySelectorAll('.scene').forEach(function (el) {
+      var s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration);
+      el.classList.toggle('active', t >= s && t < s + d);
+    });
+    // CTA visible only inside its own window.
+    var cta = document.querySelector('[data-cta]');
+    if (cta) {
+      var cs = parseFloat(cta.dataset.start), cd = parseFloat(cta.dataset.duration);
+      cta.style.display = (t >= cs && t < cs + cd) ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
