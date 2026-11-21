@@ -1,0 +1,1 @@
+{"$schema":"https://opencode.ai/config.json","plugin":["flare"],"skill":{"flare":{"description":"Crea comerciales, ads y presentaciones animadas de producto con Flare (HTML/CSS/GSAP -> video: WebM en el navegador, o MP4 local con el CLI como opción avanzada). BYO agent, BYO key: nada sube a un servidor.","path":"./skill/SKILL.md"}}}
