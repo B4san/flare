@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="../../web/favicon.svg">
+<link rel="stylesheet" href="../../web/tokens.css">
+<link rel="stylesheet" href="../../web/vendor/fonts.css">
+<title>Descanso Total — 17.5s 9:16</title>
+<script src="../../web/vendor/gsap.min.js"></script>
+<style>
+  /* Flare — design system (web/tokens.css): fondo #0A0A0F, tipografía
+     Space Grotesk (títulos) / Inter (cuerpo) / JetBrains Mono (código),
+     CTA en degradado flare ámbar → coral → violeta. Acentos de marca
+     deliberados (documentados): la luna y el sol son ilustración de
+     producto (ámbar cálido, cercano a --flare-1) y la cama blanca es el
+     producto; no son chrome de página. */
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg,#0A0A0F);display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--font-body,'Inter',system-ui,sans-serif);color:var(--text,#F5F5F2)}
+  #stage{position:relative;width:1080px;height:1920px;overflow:hidden;background-color:#0A0A0F;background-image:radial-gradient(700px 500px at 50% 0%,rgba(255,176,32,.08),transparent 70%),radial-gradient(600px 600px at 50% 100%,rgba(139,92,246,.09),transparent 70%)}
+  .clip{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10% 10%}
+  .clip.active{display:flex}
+  .caption{position:absolute;left:10%;right:10%;bottom:12%;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:56px;line-height:1.2;font-weight:700;text-shadow:0 4px 24px rgba(0,0,0,.6);z-index:5}
+  .hook{font-family:var(--font-display,'Space Grotesk',system-ui,sans-serif);font-size:96px;line-height:1.05;font-weight:900}
+  .sub{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:44px;opacity:.9;margin-top:24px;line-height:1.3}
+  .moon{width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffbe6,#ffd76a 60%,#f5b942);box-shadow:0 0 120px 40px rgba(255,215,106,.35);margin-bottom:40px}
+  .person{font-size:200px;line-height:1}
+  .bed{width:640px;height:220px;border-radius:40px;background:linear-gradient(180deg,#f5f0ff,#c9b8f5);border:10px solid #fff;position:relative;margin:30px 0}
+  .bed::before{content:"";position:absolute;left:40px;top:-70px;width:180px;height:90px;border-radius:60px;background:#fff}
+  .pillow{position:absolute;left:60px;top:-40px;width:200px;height:80px;border-radius:50px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+  .stars{position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20% 20%,#fff,transparent),radial-gradient(3px 3px at 70% 10%,#fff,transparent),radial-gradient(2px 2px at 85% 30%,#fff,transparent),radial-gradient(3px 3px at 40% 8%,#fff,transparent)}
+  .sun{width:260px;height:260px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#fff8d6,#ffb703 65%,#fb8500);box-shadow:0 0 140px 50px rgba(255,183,3,.45);margin-bottom:40px}
+  .badge{display:inline-block;background:var(--flare,#FFB020);color:#fff;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-weight:900;font-size:40px;padding:18px 36px;border-radius:999px;margin-top:28px}
+  .cta{position:absolute;left:10%;right:10%;bottom:20%;z-index:6;text-align:center} /* banda propia del CTA, por encima del caption (bottom 12%) */
+  .cta strong{display:block;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:84px;font-weight:900;background:var(--flare,#FFB020);color:#fff;padding:32px 20px;border-radius:28px}
+  .cta span{display:block;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:44px;margin-top:20px}
+  .logo{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:40px;letter-spacing:6px;opacity:.85}
+  /* Banda media del frame final (J1 R3): ocupa la zona entre el logo/badge
+     y el CTA para que no quede una banda central vacía; el contenido se
+     reparte con space-evenly para que ningún hueco supere ~150px. */
+  .mid{position:absolute;left:10%;right:10%;top:28%;bottom:34%;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;text-align:center;z-index:4}
+  .mid-tag{font-family:var(--font-display,'Space Grotesk',system-ui,sans-serif);font-size:54px;font-weight:900;line-height:1.15}
+  .mid-chips{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+  .mid-chip{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:34px;font-weight:700;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);padding:14px 26px;border-radius:999px;white-space:nowrap}
+  .mid-line{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:40px;opacity:.9;line-height:1.3}
+</style>
+</head>
+<body>
+<div id="stage" data-composition-id="colchon-descanso-total" data-width="1080" data-height="1920" data-duration="17.5">
+  <section class="clip" data-start="0" data-duration="2.5" data-track-index="0">
+    <div class="stars"></div>
+    <div class="moon" data-anim></div>
+    <h1 class="hook" data-anim>¿Dormiste mal<br>otra vez?</h1>
+    <p class="sub" data-anim>Otra noche en vela, otra mañana agotada.</p>
+    <p class="caption" data-start="0" data-duration="2.5">Dormir mal se paga todo el día.</p>
+  </section>
+  <section class="clip" data-start="2.5" data-duration="3" data-track-index="0">
+    <div class="person" data-anim>😫</div>
+    <h2 class="hook" data-anim style="font-size:64px">Te levantas<br>cansado.</h2>
+    <p class="sub" data-anim>Con la espalda rota, todos los días.</p>
+    <p class="caption" data-start="2.5" data-duration="3">El colchón viejo ya no te deja descansar.</p>
+  </section>
+  <section class="clip" data-start="5.5" data-duration="3" data-track-index="0">
+    <div class="bed" data-anim><div class="pillow"></div></div>
+    <h2 class="hook" data-anim style="font-size:80px">Llegó<br>Descanso Total</h2>
+    <p class="sub" data-anim>La cama que por fin te deja dormir.</p>
+    <p class="caption" data-start="5.5" data-duration="3">Un descanso pensado para tu espalda.</p>
+  </section>
+  <section class="clip" data-start="8.5" data-duration="3" data-track-index="0">
+    <div class="bed" data-anim><div class="pillow"></div></div>
+    <h2 class="hook" data-anim style="font-size:64px">Soporte firme,<br>frescura total.</h2>
+    <p class="sub" data-anim>Firme donde hace falta, fresco toda la noche.</p>
+    <p class="caption" data-start="8.5" data-duration="3">Duerme fresco, despierta entero.</p>
+  </section>
+  <section class="clip" data-start="11.5" data-duration="3" data-track-index="0">
+    <div class="sun" data-anim></div>
+    <h2 class="hook" data-anim style="font-size:80px">Despierta<br>renovado</h2>
+    <p class="sub" data-anim>Mañanas con energía, desde la primera noche.</p>
+    <p class="caption" data-start="11.5" data-duration="3">El amanecer se siente distinto.</p>
+  </section>
+  <section class="clip" data-start="14.5" data-duration="3" data-track-index="0" style="justify-content:flex-start;padding-top:8%">
+    <div class="moon" data-anim style="width:180px;height:180px;opacity:.85;margin-bottom:32px"></div>
+    <p class="logo" data-anim>DESCANSO TOTAL</p>
+    <div class="badge" data-anim>DUERME MEJOR · VIVE MEJOR</div>
+    <div class="mid" data-anim>
+      <p class="mid-tag">Soporte firme, frescura total.</p>
+      <div class="mid-chips"><span class="mid-chip">✓ Soporte firme</span><span class="mid-chip">✓ Frescura total</span><span class="mid-chip">✓ Despierta renovado</span></div>
+      <p class="mid-line">Mañanas con energía, desde la primera noche.</p>
+    </div>
+    <div class="cta" data-start="14.5" data-duration="3"><strong>Descúbrelo hoy</strong><span>Duerme mejor desde hoy.</span></div>
+    <p class="caption" data-start="14.5" data-duration="3">Tu mejor noche empieza hoy.</p>
+  </section>
+</div>
+<script>
+  window.__flareDuration = 17.5;
+  var clips = Array.prototype.slice.call(document.querySelectorAll('.clip'));
+  var timelines = clips.map(function (clip) {
+    var dur = parseFloat(clip.dataset.duration);
+    var tl = gsap.timeline({ paused: true });
+    clip.querySelectorAll('[data-anim]').forEach(function (el) {
+      tl.fromTo(el, { opacity: 0, y: 40, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power3.out' }, 0);
+      tl.to(el, { y: -12, duration: Math.max(0.1, dur - 0.6), ease: 'none' }, 0.6);
+    });
+    return tl;
+  });
+  window.__flareSeek = function (t) {
+    t = Math.max(0, Math.min(window.__flareDuration, Number(t) || 0));
+    clips.forEach(function (clip, i) {
+      var start = parseFloat(clip.dataset.start), dur = parseFloat(clip.dataset.duration);
+      var p = t < start ? 0 : t >= start + dur ? 1 : (t - start) / dur;
+      timelines[i].progress(p);
+      clip.classList.toggle('active', t >= start && t < start + dur || (t === window.__flareDuration && i === clips.length - 1));
+    });
+  };
+  var params = new URLSearchParams(location.search);
+  window.__flareSeek(parseFloat(params.get('t') || '0'));
+</script>
+</body>
+</html>
