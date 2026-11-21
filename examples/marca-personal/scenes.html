@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="../../web/favicon.svg">
+<link rel="stylesheet" href="../../web/tokens.css">
+<link rel="stylesheet" href="../../web/vendor/fonts.css">
+<title>De cero a builder — ad 1:1 15s</title>
+<script src="../../web/vendor/gsap.min.js"></script>
+<style>
+  /* Flare — design system (web/tokens.css): fondo #0A0A0F, tipografía
+     Space Grotesk (títulos) / Inter (cuerpo), CTA en degradado flare.
+     Acento de marca deliberado (documentado): el tag "DESPUÉS" usa
+     --success (verde semántico de tokens.css, estado de éxito), no un
+     rosa/cian independiente. */
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg,#0A0A0F);display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--font-body,'Inter',system-ui,sans-serif);color:var(--text,#F5F5F2)}
+  #stage{position:relative;width:1080px;height:1080px;overflow:hidden;background-color:#0A0A0F;background-image:radial-gradient(700px 500px at 50% 0%,rgba(255,176,32,.08),transparent 70%),radial-gradient(600px 600px at 50% 100%,rgba(139,92,246,.09),transparent 70%)}
+  .clip{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10% 10%}
+  .clip.active{display:flex}
+  .caption{position:absolute;left:10%;right:10%;bottom:10%;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:48px;line-height:1.25;font-weight:700;text-shadow:0 4px 24px rgba(0,0,0,.6);z-index:5}
+  .hook{font-family:var(--font-display,'Space Grotesk',system-ui,sans-serif);font-size:72px;line-height:1.05;font-weight:900}
+  .sub{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:40px;opacity:.9;margin-top:20px;line-height:1.35}
+  .tag{display:inline-block;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:32px;font-weight:900;letter-spacing:3px;padding:12px 28px;border-radius:999px;margin-bottom:28px}
+  .before{background:#5a5a5a;color:#fff}
+  .after{background:var(--success,#34D399);color:#062b16}
+  .big{font-size:150px;line-height:1}
+  .bar{width:640px;height:28px;border-radius:999px;background:#333;overflow:hidden;margin:24px 0}
+  .fill{height:100%;width:15%;background:var(--flare,#FFB020)}
+  .fill.full{width:92%;background:var(--flare,#FFB020)}
+  .cta{position:absolute;left:10%;right:10%;bottom:20%;z-index:6;text-align:center} /* banda propia del CTA, por encima del caption (bottom 10%) */
+  .cta strong{display:block;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:64px;font-weight:900;background:var(--flare,#FFB020);color:#fff;padding:28px 20px;border-radius:24px}
+  .cta span{display:block;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:36px;margin-top:16px}
+  .handle{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:36px;opacity:.9}
+  /* Banda media del frame final (J1 R3): ocupa la zona entre el handle
+     y el CTA para que no quede una banda central vacía; el contenido se
+     reparte con space-evenly para que ningún hueco supere ~80px. */
+  .mid{position:absolute;left:10%;right:10%;top:36%;bottom:39%;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;text-align:center;z-index:4}
+  .mid-tag{font-family:var(--font-display,'Space Grotesk',system-ui,sans-serif);font-size:40px;font-weight:900;line-height:1.2}
+  .mid-chips{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+  .mid-chip{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:28px;font-weight:700;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);padding:12px 22px;border-radius:999px;white-space:nowrap}
+  /* Avatar real: círculo con iniciales "AR" + anillo en degradado flare */
+  .avatar{width:180px;height:180px;border-radius:50%;background:linear-gradient(135deg,#FFB020,#FF5A3C,#8B5CF6);padding:7px;box-shadow:0 0 60px rgba(255,90,60,.35);margin-bottom:28px}
+  .avatar span{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:#1a1a26;font-size:68px;font-weight:900;color:#fff}
+</style>
+</head>
+<body>
+<div id="stage" data-composition-id="marca-personal" data-width="1080" data-height="1080" data-duration="15">
+  <section class="clip" data-start="0" data-duration="3" data-track-index="0">
+    <span class="tag before" data-anim>ANTES</span>
+    <h1 class="hook" data-anim>¿Y si nadie<br>ve tu trabajo?</h1>
+    <p class="sub" data-anim>Publicas y no pasa nada. Otra vez.</p>
+    <p class="caption" data-start="0" data-duration="3">Tu trabajo merece ser visto.</p>
+  </section>
+  <section class="clip" data-start="3" data-duration="3" data-track-index="0">
+    <span class="tag before" data-anim>ANTES</span>
+    <p class="big" data-anim>📉</p>
+    <h2 class="hook" data-anim style="font-size:56px">Ideas buenas, cero alcance.</h2>
+    <p class="sub" data-anim>Publicar y que no pase nada.</p>
+    <div class="bar" data-anim><div class="fill"></div></div>
+    <p class="caption" data-start="3" data-duration="3">Buenas ideas, alcance en cero.</p>
+  </section>
+  <section class="clip" data-start="6" data-duration="3" data-track-index="0">
+    <h2 class="hook" data-anim>El giro:<br>construir en público</h2>
+    <p class="sub" data-anim>Un proyecto. Un post al día.<br>Sin humo.</p>
+    <p class="caption" data-start="6" data-duration="3">Construir en público cambia el alcance.</p>
+  </section>
+  <section class="clip" data-start="9" data-duration="3" data-track-index="0">
+    <span class="tag after" data-anim>DESPUÉS</span>
+    <p class="big" data-anim>🚀</p>
+    <h2 class="hook" data-anim style="font-size:56px">La misma persona.<br>Otro sistema.</h2>
+    <p class="sub" data-anim>El alcance sube sin cambiar quién eres.</p>
+    <div class="bar" data-anim><div class="fill full"></div></div>
+    <p class="caption" data-start="9" data-duration="3">El mismo trabajo, con un sistema detrás.</p>
+  </section>
+  <section class="clip" data-start="12" data-duration="3" data-track-index="0" style="justify-content:flex-start;padding-top:8%">
+    <div class="avatar" data-anim><span>AR</span></div>
+    <p class="handle" data-anim>Alex Rivera · builder</p>
+    <div class="mid" data-anim>
+      <p class="mid-tag">Un proyecto. Un post al día. Sin humo.</p>
+      <div class="mid-chips"><span class="mid-chip">Un proyecto</span><span class="mid-chip">Un post al día</span><span class="mid-chip">Sin humo</span></div>
+    </div>
+    <div class="cta" data-start="12" data-duration="3"><strong>Sígueme y construyamos</strong><span>Un proyecto a la vez.</span></div>
+    <p class="caption" data-start="12" data-duration="3">Sigue el proyecto, paso a paso.</p>
+  </section>
+</div>
+<script>
+  window.__flareDuration = 15;
+  var clips = Array.prototype.slice.call(document.querySelectorAll('.clip'));
+  var timelines = clips.map(function (clip) {
+    var dur = parseFloat(clip.dataset.duration);
+    var tl = gsap.timeline({ paused: true });
+    clip.querySelectorAll('[data-anim]').forEach(function (el) {
+      tl.fromTo(el, { opacity: 0, y: 40, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power3.out' }, 0);
+      tl.to(el, { y: -12, duration: Math.max(0.1, dur - 0.6), ease: 'none' }, 0.6);
+    });
+    return tl;
+  });
+  window.__flareSeek = function (t) {
+    t = Math.max(0, Math.min(window.__flareDuration, Number(t) || 0));
+    clips.forEach(function (clip, i) {
+      var start = parseFloat(clip.dataset.start), dur = parseFloat(clip.dataset.duration);
+      var p = t < start ? 0 : t >= start + dur ? 1 : (t - start) / dur;
+      timelines[i].progress(p);
+      clip.classList.toggle('active', t >= start && t < start + dur || (t === window.__flareDuration && i === clips.length - 1));
+    });
+  };
+  var params = new URLSearchParams(location.search);
+  window.__flareSeek(parseFloat(params.get('t') || '0'));
+</script>
+</body>
+</html>
