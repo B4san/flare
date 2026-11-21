@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flare — Estudio agent-native para comerciales de producto</title>
+<meta name="description" content="Flare es un estudio agent-native open source para crear comerciales, ads y presentaciones animadas de producto. HTML/CSS/GSAP → WebM / MP4. BYO agent, BYO key.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="vendor/fonts.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="styles.css">
+<script src="vendor/gsap.min.js"></script>
+</head>
+<body>
+
+<!-- Aviso file:// (R4-2): solo visible cuando se abre index.html directo,
+     sin servidor. Lo muestra app.js si location.protocol es file:. -->
+<div class="file-banner" id="file-banner" hidden>
+  <strong>Estás viendo Flare desde un archivo local (<code>file://</code>).</strong>
+  Sin servidor, el Studio no puede leer <code>examples/*/scenes.html</code> para verificar las safe zones, así que los scores puntúan de forma conservadora (<strong>Safe 0/10</strong>, 75/100 en vez de 85/100). No es un error de las plantillas: sirve el proyecto por HTTP con <code>npm run serve</code> y verás el score real.
+</div>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <a class="nav-logo" href="#top">
+    <span class="logo-mark" aria-hidden="true"><span class="logo-play"></span></span>
+    <span class="logo-word">Flare</span>
+    <span class="logo-tag">STUDIO</span>
+  </a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-links">☰</button>
+  <nav class="nav-links" id="nav-links">
+    <a href="#que-es">Qué es</a>
+    <a href="#plantillas">Plantillas</a>
+    <a href="#retencion">Retención</a>
+    <a href="#studio">Studio</a>
+  </nav>
+  <div class="nav-actions">
+    <a class="btn btn-ghost" href="#studio">Abrir Studio</a>
+    <a class="btn btn-primary" href="https://github.com/B4san/flare" target="_blank" rel="noopener">GitHub · MIT</a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-beam" aria-hidden="true"></div>
+  <div class="hero-spotlight" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <p class="badge"><span class="badge-dot"></span> Dojo AI Hackathon 2026 &nbsp;·&nbsp; Open Source &nbsp;·&nbsp; MIT</p>
+    <h1 class="hero-title">
+      <span class="hero-line"><span class="w">El</span> <span class="w grad">comercial</span></span>
+      <span class="hero-line"><span class="w">que</span> <span class="w">tu</span> <span class="w grad">agente</span></span>
+      <span class="hero-line"><span class="w">puede</span> <span class="w">dirigir.</span></span>
+    </h1>
+    <p class="hero-tagline"><em>Catch the eye. Hold the scroll. Earn the click.</em><br>Atrapa la mirada. Retén el scroll. Gana el click.</p>
+    <p class="hero-sub">Flare es un estudio <strong>agent-native</strong> para crear comerciales, ads y presentaciones animadas de producto. Escribes la idea, tu agente construye la animación en HTML/CSS/GSAP y la exportas en WebM desde el navegador, o en MP4 con el CLI.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary btn-lg" href="#studio">Abrir el Studio</a>
+      <a class="btn btn-ghost btn-lg" href="#plantillas">Ver plantillas</a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat"><strong>HTML / CSS / GSAP</strong><span>animación editable, no un vídeo opaco</span></div>
+      <div class="hero-stat"><strong>→ WebM / MP4</strong><span>9:16 · 1:1 · 16:9, listo para publicar</span></div>
+      <div class="hero-stat"><strong>BYO agent · BYO key</strong><span>tu agente, tu API key, tus archivos</span></div>
+    </div>
+  </div>
+  <div class="hero-scroll" aria-hidden="true"><span></span> scroll</div>
+</section>
+
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" aria-hidden="true"><div class="marquee-track">
+  <span>Hook en 2 s</span><i>✦</i><span>Captions siempre</span><i>✦</i><span>Ritmo de cortes</span><i>✦</i><span>CTA al final</span><i>✦</i><span>Safe zones</span><i>✦</i><span>HTML → WebM / MP4</span><i>✦</i>
+  <span>Hook en 2 s</span><i>✦</i><span>Captions siempre</span><i>✦</i><span>Ritmo de cortes</span><i>✦</i><span>CTA al final</span><i>✦</i><span>Safe zones</span><i>✦</i><span>HTML → WebM / MP4</span><i>✦</i>
+</div></div>
+
+<!-- ============ QUÉ ES / QUÉ NO ES ============ -->
+<section class="section" id="que-es">
+  <div class="section-head">
+    <p class="eyebrow">El concepto</p>
+    <h2>Un estudio, no un generador.</h2>
+    <p class="section-lead">Flare no inventa tu producto ni decide por ti. Te da un escenario editable donde un agente de código — el que tú ya usas — monta el anuncio escena a escena, con reglas de retención medibles.</p>
+  </div>
+  <div class="is-grid">
+    <article class="glass-card is-card">
+      <h3>Qué es Flare</h3>
+      <ul class="check-list">
+        <li><span class="tick ok">✓</span> Un estudio <strong>agent-native</strong>: tu agente (Claude Code, Codex, Cursor, Gemini CLI, OpenCode, Qwen Code) escribe la animación.</li>
+        <li><span class="tick ok">✓</span> Anuncios como <strong>código</strong>: HTML/CSS/GSAP versionable en Git, editable a mano.</li>
+        <li><span class="tick ok">✓</span> Un <strong>exportador</strong> que convierte la composición en WebM en el navegador (o MP4 local con el CLI) con las safe zones correctas.</li>
+        <li><span class="tick ok">✓</span> Un <strong>score de retención</strong> calculado escena a escena, con arreglos accionables.</li>
+        <li><span class="tick ok">✓</span> <strong>Open source, MIT</strong>. Sin cuenta, sin nube obligatoria, sin lock-in.</li>
+      </ul>
+    </article>
+    <article class="glass-card not-card">
+      <h3>Qué NO es Flare</h3>
+      <ul class="check-list">
+        <li><span class="tick no">×</span> <strong>No es un clon de HyperFrames.</strong> No copia su producto ni su marca: es un estudio abierto con otro enfoque, agent-native desde el diseño.</li>
+        <li><span class="tick no">×</span> <strong>No es un generador de vídeo con IA.</strong> No sintetiza metraje ni voces: anima diseño y tipografía que tú controlas.</li>
+        <li><span class="tick no">×</span> <strong>No guarda tus keys.</strong> BYO agent, BYO key: tus credenciales nunca pasan por nuestros servidores, porque no hay servidores.</li>
+        <li><span class="tick no">×</span> <strong>No es una caja negra.</strong> Cada escena es un clip con inicio, duración y caption que puedes inspeccionar y cambiar.</li>
+      </ul>
+    </article>
+  </div>
+  <div class="flow-strip">
+    <div class="flow-step"><span class="flow-num">01</span><strong>Idea + brief</strong><span>Producto, formato, escenas y reglas de retención.</span></div>
+    <div class="flow-arrow" aria-hidden="true">→</div>
+    <div class="flow-step"><span class="flow-num">02</span><strong>Tu agente construye</strong><span>Escribe la composición HTML/CSS/GSAP con la skill.</span></div>
+    <div class="flow-arrow" aria-hidden="true">→</div>
+    <div class="flow-step"><span class="flow-num">03</span><strong>Studio + score</strong><span>Previsualizas, mides retención y corriges en vivo.</span></div>
+    <div class="flow-arrow" aria-hidden="true">→</div>
+    <div class="flow-step"><span class="flow-num">04</span><strong>Exporta WebM o MP4</strong><span>MediaRecorder en el navegador; MP4 local opcional con CLI.</span></div>
+  </div>
+</section>
+
+<!-- ============ PLANTILLAS ============ -->
+<section class="section" id="plantillas">
+  <div class="section-head">
+    <p class="eyebrow">Plantillas</p>
+    <h2>Tres formas de enganchar en 2 segundos.</h2>
+    <p class="section-lead">Las tres plantillas son los ejemplos reales del proyecto: se cargan desde <code>examples/</code> y su score se calcula con el motor unificado de retención — no es un número fijo. Púlsala y se carga en el Studio, lista para editar con tu agente.</p>
+  </div>
+  <div class="templates-grid">
+
+    <article class="template-card glass-card spot" data-template="colchon-descanso-total">
+      <div class="mini-preview mini-night" aria-hidden="true">
+        <div class="mini-stage">
+          <div class="mini-moon"></div>
+          <div class="mini-eyebrow">DESCANSO TOTAL</div>
+          <div class="mini-big">¿Dormiste mal<br><span>otra vez?</span></div>
+          <div class="mini-bar"></div>
+          <div class="mini-caption">Dormir mal se paga todo el día.</div>
+        </div>
+      </div>
+      <div class="template-body">
+        <div class="template-top"><h3>Descanso Total</h3><span class="pill">9:16 · 18 s</span></div>
+        <p>Un colchón ficticio: una pregunta que duele, el problema, el producto y el cierre. Hook, dolor, beneficio y CTA en 6 escenas de 3 s.</p>
+        <div class="template-meta">
+          <span>Formato <strong>9:16</strong></span>
+          <span>Duración <strong>18 s</strong></span>
+          <span>Retención <strong class="score-good tpl-score" data-template-score="colchon-descanso-total">…</strong></span>
+        </div>
+        <div class="score-breakdown" data-template-breakdown="colchon-descanso-total">…</div>
+        <button class="btn btn-primary btn-block" data-use-template="colchon-descanso-total">Usar en Studio →</button>
+      </div>
+    </article>
+
+    <article class="template-card glass-card spot" data-template="marca-personal">
+      <div class="mini-preview mini-ba" aria-hidden="true">
+        <div class="mini-stage mini-split">
+          <div class="mini-half mini-before"><span>ANTES</span><em>sin alcance</em></div>
+          <div class="mini-half mini-after"><span>DESPUÉS</span><em>con sistema</em></div>
+          <div class="mini-divider"></div>
+        </div>
+      </div>
+      <div class="template-body">
+        <div class="template-top"><h3>De cero a builder</h3><span class="pill">1:1 · 15 s</span></div>
+        <p>Marca personal de un builder ficticio: publicar sin que nadie lo vea, el giro de construir en público y el mismo trabajo con otro sistema.</p>
+        <div class="template-meta">
+          <span>Formato <strong>1:1</strong></span>
+          <span>Duración <strong>15 s</strong></span>
+          <span>Retención <strong class="score-good tpl-score" data-template-score="marca-personal">…</strong></span>
+        </div>
+        <div class="score-breakdown" data-template-breakdown="marca-personal">…</div>
+        <button class="btn btn-primary btn-block" data-use-template="marca-personal">Usar en Studio →</button>
+      </div>
+    </article>
+
+    <article class="template-card glass-card spot" data-template="saas-presentacion">
+      <div class="mini-preview mini-saas" aria-hidden="true">
+        <div class="mini-stage">
+          <div class="mini-eyebrow">GESTIÓN SIMPLE</div>
+          <div class="mini-big">Menos papeleo.<br><span>Más ventas.</span></div>
+          <div class="mini-screen"><i style="width:85%"></i><i style="width:60%"></i><i style="width:42%"></i></div>
+          <div class="mini-caption">El papeleo se come tu semana.</div>
+        </div>
+      </div>
+      <div class="template-body">
+        <div class="template-top"><h3>Gestión Simple</h3><span class="pill">16:9 · 24 s</span></div>
+        <p>Presentación de un SaaS ficticio para pymes: del papeleo que se come la semana a ventas, inventario y facturación en una sola pantalla.</p>
+        <div class="template-meta">
+          <span>Formato <strong>16:9</strong></span>
+          <span>Duración <strong>24 s</strong></span>
+          <span>Retención <strong class="score-good tpl-score" data-template-score="saas-presentacion">…</strong></span>
+        </div>
+        <div class="score-breakdown" data-template-breakdown="saas-presentacion">…</div>
+        <button class="btn btn-primary btn-block" data-use-template="saas-presentacion">Usar en Studio →</button>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ RETENCIÓN ============ -->
+<section class="section" id="retencion">
+  <div class="section-head">
+    <p class="eyebrow">Retención, medida</p>
+    <h2>El score no es magia. Son cinco reglas.</h2>
+    <p class="section-lead">Flare puntúa tu anuncio de 0 a 100 con reglas que el Studio calcula sobre tus escenas reales — no sobre una corazonada.</p>
+  </div>
+  <div class="rules-grid">
+    <div class="rule-card glass-card spot"><span class="rule-pts">30 pts</span><h3>Hook en 2 s</h3><p>Movimiento + texto grande + pregunta o contraste en los primeros 2 segundos. Si el espectador no entiende el conflicto al instante, ya hizo scroll.</p></div>
+    <div class="rule-card glass-card spot"><span class="rule-pts">25 pts</span><h3>Captions ≥ 80%</h3><p>La mayoría ve sin sonido. Si los captions no cubren al menos el 80% de la duración, el mensaje se pierde.</p></div>
+    <div class="rule-card glass-card spot"><span class="rule-pts">20 pts</span><h3>Ritmo de cortes</h3><p>Escenas de 2 a 4 segundos mantienen la atención. Más largas aburren; más cortas marean.</p></div>
+    <div class="rule-card glass-card spot"><span class="rule-pts">15 pts</span><h3>CTA al final</h3><p>Call to action en los últimos 3 segundos y visible al menos 2 segundos. Un CTA de medio segundo no existe.</p></div>
+    <div class="rule-card glass-card spot"><span class="rule-pts">10 pts</span><h3>Safe zones</h3><p>En 9:16, el texto debe vivir dentro de los márgenes del 10%: fuera quedan la UI, los botones y el caption del sistema.</p></div>
+  </div>
+  <div class="retention-demo glass-card spot">
+    <div class="retention-demo-text">
+      <h3>Así se ve en el Studio</h3>
+      <p>Cada regla aparece como un ítem en verde o en rojo, con la sugerencia exacta para arreglarla. Cambia una escena y el score se recalcula al instante — pruébalo abajo con la simulación del agente.</p>
+      <a class="btn btn-ghost" href="#studio">Ir al panel de Retención ↓</a>
+    </div>
+    <div class="retention-demo-score"><span class="big-score" id="landing-score">…</span><span class="big-score-label" id="landing-score-label">/ 100 · Descanso Total</span></div>
+  </div>
+</section>
+
+<!-- ============ STUDIO ============ -->
+<section class="section studio-section" id="studio">
+  <div class="section-head">
+    <p class="eyebrow">Studio · funciona sin backend</p>
+    <h2>El Studio</h2>
+    <p class="section-lead">Arrastra las ventanas, minimízalas, tráelas al frente. Todo corre en tu navegador: GSAP anima el preview, el score se calcula sobre tus escenas y el brief se genera a partir del estado real.</p>
+  </div>
+
+  <!-- Aviso file:// también en el Studio (R4-2): mismo banner que en la landing. -->
+  <div class="file-banner file-banner--studio" id="file-banner-studio" hidden>
+    <strong>Estás viendo Flare desde un archivo local (<code>file://</code>).</strong>
+    Sin servidor, el Studio no puede leer <code>examples/*/scenes.html</code> para verificar las safe zones, así que los scores puntúan de forma conservadora (<strong>Safe 0/10</strong>, 75/100 en vez de 85/100). Sirve el proyecto por HTTP con <code>npm run serve</code> para ver el score real.
+  </div>
+
+  <!-- Toolbar del Studio -->
+  <div class="studio-toolbar glass-card">
+    <div class="toolbar-group">
+      <label for="agent-select">Agente</label>
+      <select id="agent-select">
+        <option value="claude-code" selected>Claude Code</option>
+        <option value="codex">Codex</option>
+        <option value="cursor">Cursor</option>
+        <option value="gemini-cli">Gemini CLI</option>
+        <option value="opencode">OpenCode</option>
+        <option value="qwen-code">Qwen Code</option>
+      </select>
+    </div>
+    <div class="toolbar-group">
+      <label for="template-select">Plantilla</label>
+      <select id="template-select">
+        <option value="colchon-descanso-total" selected>Descanso Total · colchón 9:16 · 18 s</option>
+        <option value="marca-personal">De cero a builder · marca personal 1:1 · 15 s</option>
+        <option value="saas-presentacion">Gestión Simple · SaaS 16:9 · 24 s</option>
+      </select>
+    </div>
+    <div class="toolbar-group">
+      <label>Formato</label>
+      <div class="format-switch" role="group" aria-label="Formato del anuncio">
+        <button data-format="9:16" class="active">9:16</button>
+        <button data-format="1:1">1:1</button>
+        <button data-format="16:9">16:9</button>
+      </div>
+    </div>
+    <div class="toolbar-group toolbar-spacer"></div>
+    <button class="btn btn-ghost" id="btn-reset-template" title="Descartar los cambios del Studio y volver a la plantilla original">↺ Restablecer plantilla</button>
+    <button class="btn btn-ghost" id="btn-simulate">▶ Simular agente trabajando</button>
+    <button class="btn btn-primary" id="btn-generate">Generar con mi agente</button>
+  </div>
+
+  <!-- Panel proveedor de modelo (BYO key) -->
+  <div class="provider-panel glass-card" id="provider-panel">
+    <div class="provider-head">
+      <div>
+        <h3>Proveedor de modelo <span class="pill">BYO key</span></h3>
+        <p>Elige con qué modelo trabaja tu agente. Sin backend: la configuración vive solo en tu navegador.</p>
+      </div>
+      <span class="provider-saved" id="provider-saved">No guardado</span>
+    </div>
+    <div class="provider-grid">
+      <div class="field">
+        <label for="provider-select">Proveedor</label>
+        <select id="provider-select">
+          <option value="openai" selected>OpenAI</option>
+          <option value="anthropic">Anthropic</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="qwen">Qwen</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="groq">Groq</option>
+          <option value="together">Together</option>
+          <option value="mistral">Mistral</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="fireworks">Fireworks AI</option>
+          <option value="ollama">Ollama (local)</option>
+          <option value="lmstudio">LM Studio (local)</option>
+          <option value="custom">Custom (OpenAI-compatible)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="provider-baseurl">Base URL</label>
+        <input id="provider-baseurl" type="url" value="https://api.openai.com/v1" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="provider-model">Modelo</label>
+        <input id="provider-model" list="provider-models" value="gpt-5" autocomplete="off">
+        <datalist id="provider-models"></datalist>
+      </div>
+      <div class="field">
+        <label for="provider-key">API key <span id="provider-key-req">(requerida)</span></label>
+        <input id="provider-key" type="password" placeholder="sk-…" autocomplete="off">
+      </div>
+    </div>
+    <p class="provider-note">Tu key nunca sale de tu navegador. Flare no tiene servidor.</p>
+    <p class="provider-local-note" id="provider-local-note" hidden>Modelo local: la key es opcional y puede ir vacía. Tu agente habla con tu máquina, no con ninguna nube.</p>
+    <div class="provider-custom" id="provider-custom" hidden>Endpoint compatible con la API de OpenAI (<code>/v1/chat/completions</code>). Pega tu base URL, el nombre del modelo y tu key.</div>
+    <div class="provider-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-provider-clear">Borrar key</button>
+      <button class="btn btn-primary btn-sm" id="btn-provider-save">Guardar en este navegador</button>
+    </div>
+  </div>
+
+  <p class="studio-hint">Consejo: arrastra las ventanas por su barra superior · haz click en una escena de la Timeline para saltar a ella · pulsa <strong>Espacio</strong> sobre el Studio para play/pause.</p>
+
+  <!-- Área de ventanas flotantes -->
+  <div class="studio-desk" id="studio-desk">
+
+    <!-- Ventana: Preview -->
+    <section class="float-window" id="win-preview" style="left:24px;top:16px;width:400px;z-index:30">
+      <header class="win-header" data-drag>
+        <span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="win-title">Preview · <span id="preview-format-label">9:16</span></span>
+        <span class="win-status" id="preview-status">pausado</span>
+        <button class="win-btn win-min" data-minimize="win-preview" title="Minimizar" aria-label="Minimizar preview">–</button>
+      </header>
+      <div class="win-body preview-body">
+        <div class="preview-wrap">
+          <div class="preview-stage aspect-9-16" id="preview-stage">
+            <!-- La composición se renderiza aquí desde app.js, respetando el contrato de escenas -->
+            <div id="composition" data-composition-id="flare-ad" data-width="1080" data-height="1920" data-duration="18"></div>
+            <div class="safe-zone" aria-hidden="true"><span>safe zone · 10%</span></div>
+          </div>
+        </div>
+        <div class="preview-controls">
+          <button class="btn btn-primary btn-sm" id="btn-play">▶ Play</button>
+          <button class="btn btn-ghost btn-sm" id="btn-restart">Reiniciar</button>
+          <button class="btn btn-ghost btn-sm" id="btn-export-webm">Exportar video (WebM)</button>
+          <button class="btn btn-ghost btn-sm" id="btn-export-board">Storyboard HTML</button>
+          <span class="timecode" id="timecode">0.0 s / 18.0 s</span>
+        </div>
+        <span class="export-status" id="export-status"></span>
+        <p class="preview-caption-line" id="preview-caption">—</p>
+      </div>
+    </section>
+
+    <!-- Ventana: Timeline -->
+    <section class="float-window" id="win-timeline" style="left:448px;top:16px;width:760px;z-index:20">
+      <header class="win-header" data-drag>
+        <span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="win-title">Timeline · <span id="timeline-product">Descanso Total</span></span>
+        <span class="win-status" id="timeline-count">5 escenas</span>
+        <button class="win-btn win-min" data-minimize="win-timeline" title="Minimizar" aria-label="Minimizar timeline">–</button>
+      </header>
+      <div class="win-body">
+        <div class="timeline-ruler" id="timeline-ruler"></div>
+        <div class="timeline-tracks" id="timeline-tracks"></div>
+        <div class="timeline-detail" id="timeline-detail">Haz click en una escena para verla y editar su caption.</div>
+      </div>
+    </section>
+
+    <!-- Ventana: Retención -->
+    <section class="float-window" id="win-retention" style="left:448px;top:416px;width:760px;z-index:10">
+      <header class="win-header" data-drag>
+        <span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="win-title">Retención</span>
+        <span class="win-status" id="retention-verdict">Bueno</span>
+        <button class="win-btn win-min" data-minimize="win-retention" title="Minimizar" aria-label="Minimizar retención">–</button>
+      </header>
+      <div class="win-body retention-body">
+        <div class="score-ring">
+          <svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+            <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFB020"/><stop offset="50%" stop-color="#FF5A3C"/><stop offset="100%" stop-color="#8B5CF6"/>
+            </linearGradient></defs>
+            <circle cx="60" cy="60" r="52" class="ring-bg"></circle>
+            <circle cx="60" cy="60" r="52" class="ring-fg" id="ring-fg"></circle>
+          </svg>
+          <div class="score-ring-text"><strong id="retention-score">…</strong><span>/ 100</span></div>
+        </div>
+        <ul class="retention-checklist" id="retention-checklist"></ul>
+      </div>
+    </section>
+
+    <!-- Ventana: Actividad del agente -->
+    <section class="float-window" id="win-agent" style="left:24px;top:736px;width:1184px;z-index:15">
+      <header class="win-header" data-drag>
+        <span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="win-title">Actividad del agente</span>
+        <span class="win-status" id="agent-state">inactivo</span>
+        <button class="win-btn win-min" data-minimize="win-agent" title="Minimizar" aria-label="Minimizar agente">–</button>
+      </header>
+      <div class="win-body agent-body">
+        <div class="agent-id">
+          <span class="agent-avatar" id="agent-avatar" style="--agent-color:#8B5CF6">C</span>
+          <div>
+            <strong id="agent-name">Claude Code</strong>
+            <span class="agent-sub" id="agent-sub">Skill flare · lista para construir</span>
+          </div>
+          <span class="thinking" id="agent-thinking" hidden><i></i><i></i><i></i></span>
+          <span class="agent-pulse" id="agent-pulse" aria-hidden="true"></span>
+        </div>
+        <code class="agent-command" id="agent-command">claude "/flare:build --brief brief.md"</code>
+        <div class="agent-log" id="agent-log">
+          <p class="log-line log-muted">Sin actividad todavía. Pulsa «Simular agente trabajando» o genera un brief.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Panel: Generar con mi agente -->
+  <div class="generate-panel glass-card" id="generate-panel">
+    <div class="generate-head">
+      <h3>Brief para tu agente</h3>
+      <p>Generado a partir del anuncio actual en el Studio — producto, formato, duración, escenas y reglas de retención. Cópialo y pásaselo a tu agente con el comando exacto.</p>
+    </div>
+    <div class="generate-grid">
+      <div>
+        <label for="brief-output">Brief (brief.md)</label>
+        <textarea id="brief-output" rows="16" readonly placeholder="Ejemplo de brief (pulsa «Generar con mi agente» para crear el del anuncio actual):&#10;&#10;# Brief — Descanso Total&#10;Producto: Descanso Total · colchón de descanso&#10;Formato: 9:16 (1080×1920) · Duración: 18 s · 6 escenas de 3 s&#10;Escenas: Hook, Dolor, Producto, Beneficio, Resultado, CTA&#10;Reglas: hook en 2 s · captions ≥80 % · cortes de 2–4 s · CTA en los últimos 3 s · safe zones del 10 %"></textarea>
+        <div class="generate-actions">
+          <button class="btn btn-primary" id="btn-copy-brief">Copiar brief</button>
+          <button class="btn btn-ghost" id="btn-copy-command">Copiar comando</button>
+          <span class="copy-feedback" id="copy-feedback" aria-live="polite"></span>
+        </div>
+      </div>
+      <div>
+        <label>Comando exacto · <span id="command-agent-label">Claude Code</span></label>
+        <pre class="command-box" id="command-box">claude "/flare:build --brief brief.md"</pre>
+        <div class="generate-steps">
+          <h4>Cómo usarlo</h4>
+          <ol>
+            <li>Copia el brief y guárdalo como <code>brief.md</code> junto a tu proyecto.</li>
+            <li>Ejecuta el comando de tu agente en esa carpeta.</li>
+            <li>El agente crea la composición (<code>data-composition-id</code>, clips, captions y CTA) y la abres aquí para medir la retención.</li>
+          </ol>
+          <p class="generate-note">Tus keys nunca salen de tu máquina: el agente corre con tu propia API key y Flare no tiene backend.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="logo-mark" aria-hidden="true"><span class="logo-play"></span></span>
+      <strong>Flare</strong>
+      <p>Estudio agent-native open source para comerciales de producto. HTML/CSS/GSAP → WebM / MP4.</p>
+    </div>
+    <nav class="footer-links">
+      <div><h4>Proyecto</h4><a href="#studio">Studio</a><a href="#plantillas">Plantillas</a><a href="#retencion">Retención</a></div>
+      <div><h4>Para agentes</h4><a href="#studio" data-footer-skill>Skill flare · comando en el Studio</a><a href="#studio" data-footer-renderer>Exportar WebM / MP4 · en el Studio</a><a href="#plantillas" data-footer-examples>Plantillas</a></div>
+      <div><h4>Legal</h4><a href="https://github.com/B4san/flare/blob/main/LICENSE" target="_blank" rel="noopener">Licencia MIT</a><a href="#que-es">BYO agent · BYO key</a></div>
+    </nav>
+  </div>
+  <p class="footer-bottom">Flare © 2026 · MIT · Hecho para el Dojo AI Hackathon 2026. No es un clon de HyperFrames ni un generador de vídeo con IA.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

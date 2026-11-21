@@ -1,0 +1,57 @@
+/* Flare — tokens.css
+   ÚNICO archivo de tokens de diseño para TODA la web (landing + Studio).
+   Paleta única, tipografía única, un solo degradado de acento "flare",
+   un solo lenguaje de movimiento (GSAP, easings suaves, 300–500 ms).
+   Nada de arcoíris por componente: el cian y el rosa como acentos
+   independientes desaparecen; solo queda el degradado flare. */
+
+:root{
+  /* ---- Paleta ---- */
+  --bg:#0A0A0F;                    /* fondo */
+  --surface:#12121A;               /* superficie */
+  --surface-elevated:#1A1A26;      /* superficie elevada */
+  --surface-glass:rgba(18,18,26,.72);
+  --border:rgba(255,255,255,.08);  /* borde fino 1px */
+  --border-strong:rgba(255,255,255,.14);
+  --text:#F5F5F2;                  /* texto principal */
+  --text-secondary:#9A9AA8;        /* texto secundario */
+  --text-muted:#6E6E7C;            /* texto tenue */
+
+  /* ---- Acento único: degradado flare (ámbar → coral → violeta) ---- */
+  --flare-1:#FFB020;               /* ámbar */
+  --flare-2:#FF5A3C;               /* coral */
+  --flare-3:#8B5CF6;               /* violeta */
+  --flare:linear-gradient(135deg,#FFB020,#FF5A3C 48%,#8B5CF6);
+  --flare-soft:linear-gradient(135deg,rgba(255,176,32,.16),rgba(255,90,60,.14),rgba(139,92,246,.16));
+  --flare-glow:0 8px 28px rgba(255,90,60,.28);
+  --flare-glow-strong:0 12px 36px rgba(255,90,60,.38);
+
+  /* ---- Semántica (solo para estados: éxito / error / aviso) ---- */
+  --success:#34D399;
+  --danger:#FB7185;
+  --warning:#FBBF24;
+
+  /* ---- Tipografía ---- */
+  --font-display:'Space Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif; /* títulos */
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;           /* cuerpo */
+  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;    /* SOLO código / logs */
+
+  /* ---- Forma ---- */
+  --radius-xs:8px;                 /* solo controles pequeños (24px) */
+  --radius-inner:10px;             /* solo elementos internos (chips, barras, inputs) */
+  --radius-sm:16px;
+  --radius:18px;
+  --radius-lg:20px;
+  --radius-pill:999px;             /* solo botones y pills */
+
+  /* ---- Movimiento (un solo lenguaje: GSAP, suave, 300–500 ms) ---- */
+  --dur-fast:300ms;
+  --dur:400ms;
+  --dur-slow:500ms;
+  --ease-spring:cubic-bezier(.22,1,.36,1);
+  --ease-soft:cubic-bezier(.4,0,.2,1);
+
+  /* ---- Sombras (suaves, nunca duras) ---- */
+  --shadow-soft:0 18px 44px rgba(0,0,0,.45);
+  --shadow-card:0 10px 30px rgba(0,0,0,.35);
+}
