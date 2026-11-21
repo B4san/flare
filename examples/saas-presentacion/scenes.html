@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="../../web/favicon.svg">
+<link rel="stylesheet" href="../../web/tokens.css">
+<link rel="stylesheet" href="../../web/vendor/fonts.css">
+<title>Gestión Simple — presentación SaaS 24s 16:9</title>
+<script src="../../web/vendor/gsap.min.js"></script>
+<style>
+  /* Flare — design system (web/tokens.css): fondo #0A0A0F, tipografía
+     Space Grotesk (títulos) / Inter (cuerpo), CTA en degradado flare.
+     Acentos de marca deliberados (documentados): el panel blanco
+     (.screen) es un mockup de la UI del producto SaaS, no chrome de
+     Flare; sus barras usan los 3 colores flare y --success para la
+     barra de stock positivo. */
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg,#0A0A0F);display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--font-body,'Inter',system-ui,sans-serif);color:var(--text,#F5F5F2)}
+  #stage{position:relative;width:1920px;height:1080px;overflow:hidden;background-color:#0A0A0F;background-image:radial-gradient(700px 500px at 50% 0%,rgba(255,176,32,.08),transparent 70%),radial-gradient(600px 600px at 50% 100%,rgba(139,92,246,.09),transparent 70%)}
+  .clip{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10% 10%}
+  .clip.active{display:flex}
+  .caption{position:absolute;left:10%;right:10%;bottom:10%;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:44px;line-height:1.25;font-weight:700;text-shadow:0 4px 24px rgba(0,0,0,.6);z-index:5}
+  .hook{font-family:var(--font-display,'Space Grotesk',system-ui,sans-serif);font-size:84px;line-height:1.05;font-weight:900}
+  .sub{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:38px;opacity:.9;margin-top:20px;line-height:1.35}
+  .accent{color:var(--flare-1,#FFB020)}
+  .screen{width:1100px;height:560px;border-radius:24px;background:#fff;color:#111;padding:36px;text-align:left;box-shadow:0 30px 80px rgba(0,0,0,.5);margin-bottom:20px}
+  .screen h3{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:40px;margin-bottom:20px}
+  .bar{height:34px;border-radius:999px;margin:16px 0}
+  .row{display:flex;gap:20px;margin-top:24px}
+  .card{flex:1;background:#eef2ff;border-radius:16px;padding:24px;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:32px;font-weight:700}
+  .card small{display:block;font-size:24px;font-weight:400;color:#555;margin-top:8px}
+  .kpi{font-family:var(--font-display,'Space Grotesk',system-ui,sans-serif);font-size:110px;font-weight:900;color:var(--flare-1,#FFB020)}
+  .cta{position:absolute;left:10%;right:10%;bottom:20%;z-index:6;text-align:center} /* banda propia del CTA, por encima del caption (bottom 10%) */
+  .cta strong{display:block;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:72px;font-weight:900;background:var(--flare,#FFB020);color:#fff;padding:28px 20px;border-radius:24px}
+  .cta span{display:block;font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:36px;margin-top:16px}
+  .logo{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:36px;letter-spacing:5px;opacity:.85}
+  .check{font-family:var(--font-display,'Space Grotesk',system-ui,sans-serif);font-size:64px;color:var(--success,#34D399)}
+  /* Banda media del frame final (J1 R3): ocupa la zona entre el logo
+     y el CTA para que no quede una banda central vacía; el contenido se
+     reparte con space-evenly para que ningún hueco supere ~50px. */
+  .mid{position:absolute;left:10%;right:10%;top:42%;bottom:39%;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;text-align:center;z-index:4}
+  .mid-tag{font-family:var(--font-display,'Space Grotesk',system-ui,sans-serif);font-size:38px;font-weight:900;line-height:1.2}
+  .mid-chips{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+  .mid-chip{font-family:var(--font-body,'Inter',system-ui,sans-serif);font-size:28px;font-weight:700;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);padding:12px 22px;border-radius:999px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage" data-composition-id="saas-presentacion" data-width="1920" data-height="1080" data-duration="24">
+  <section class="clip" data-start="0" data-duration="3" data-track-index="0">
+    <h1 class="hook" data-anim>¿Tu pyme pierde<br>horas en <span class="accent">papeleo</span>?</h1>
+    <p class="sub" data-anim>Facturas, inventario y clientes… en mil hojas distintas.</p>
+    <p class="caption" data-start="0" data-duration="3">El papeleo se come tu semana.</p>
+  </section>
+  <section class="clip" data-start="3" data-duration="3" data-track-index="0">
+    <p class="kpi" data-anim>11 horas a la semana.</p>
+    <p class="sub" data-anim>Se van en tareas que una app hace sola.</p>
+    <p class="caption" data-start="3" data-duration="3">Once horas cada semana, en tareas repetidas.</p>
+  </section>
+  <section class="clip" data-start="6" data-duration="3" data-track-index="0">
+    <h2 class="hook" data-anim style="font-size:72px">Gestión Simple</h2>
+    <p class="sub" data-anim>Todo tu negocio en una sola pantalla.</p>
+    <p class="caption" data-start="6" data-duration="3">Ventas, inventario y facturas en un solo lugar.</p>
+  </section>
+  <section class="clip" data-start="9" data-duration="3" data-track-index="0">
+    <h2 class="hook" data-anim style="font-size:64px">Ventas en tiempo real.</h2>
+    <div class="screen" data-anim><h3>📊 Panel de ventas</h3><div class="bar" style="width:85%;background:#8B5CF6"></div><div class="bar" style="width:60%;background:#FFB020"></div><div class="bar" style="width:40%;background:#FF5A3C"></div><div class="row"><div class="card">Ventas hoy<small>₡1.240.000</small></div><div class="card">Pedidos<small>86 nuevos</small></div></div><p style="font-size:22px;color:#888;margin-top:18px">Datos de ejemplo · panel de demostración</p></div>
+    <p class="sub" data-anim>Tu panel de ventas, siempre al día.</p>
+    <p class="caption" data-start="9" data-duration="3">Tus ventas, sin hojas de cálculo.</p>
+  </section>
+  <section class="clip" data-start="12" data-duration="3" data-track-index="0">
+    <h2 class="hook" data-anim style="font-size:64px">Inventario al día.</h2>
+    <div class="screen" data-anim style="height:400px"><h3>📦 Panel de inventario</h3><div class="bar" style="width:72%;background:#34D399"></div><div class="row"><div class="card">Stock bajo<small>3 productos</small></div><div class="card">En camino<small>12 pedidos</small></div><div class="card">Sin quiebres<small>esta semana</small></div></div></div>
+    <p class="sub" data-anim>Alertas antes de quedarte sin producto.</p>
+    <p class="caption" data-start="12" data-duration="3">Sin quiebres, sin sorpresas de stock.</p>
+  </section>
+  <section class="clip" data-start="15" data-duration="3" data-track-index="0">
+    <h2 class="hook" data-anim style="font-size:64px">Factura en 10 segundos.</h2>
+    <div class="screen" data-anim style="height:400px"><h3>🧾 Facturación</h3><div class="bar" style="width:85%;background:#8B5CF6"></div><div class="bar" style="width:60%;background:#FFB020"></div><div class="row"><div class="card">✓ Enviada<small>hace 10 segundos</small></div></div></div>
+    <p class="sub" data-anim>Cliente, productos, enviar. Y listo.</p>
+    <p class="caption" data-start="15" data-duration="3">Factura electrónica, sin errores.</p>
+  </section>
+  <section class="clip" data-start="18" data-duration="3" data-track-index="0">
+    <p class="check" data-anim>✓ ✓ ✓</p>
+    <h2 class="hook" data-anim style="font-size:72px">Menos papeleo.<br>Más ventas.</h2>
+    <p class="sub" data-anim>El papeleo se hace solo; tú vendes.</p>
+    <p class="caption" data-start="18" data-duration="3">Menos papeleo, más tiempo para vender.</p>
+  </section>
+  <section class="clip" data-start="21" data-duration="3" data-track-index="0" style="justify-content:flex-start;padding-top:8%">
+    <div class="screen" data-anim style="width:820px;height:230px;padding:28px;margin-bottom:24px"><h3>📊 Gestión Simple</h3><div class="bar" style="width:85%;background:#8B5CF6"></div><div class="bar" style="width:60%;background:#FFB020"></div></div>
+    <p class="logo" data-anim>GESTIÓN SIMPLE</p>
+    <div class="mid" data-anim>
+      <p class="mid-tag">Todo tu negocio en una sola pantalla.</p>
+      <div class="mid-chips"><span class="mid-chip">Ventas</span><span class="mid-chip">Inventario</span><span class="mid-chip">Facturación</span></div>
+    </div>
+    <div class="cta" data-start="21" data-duration="3"><strong>Prueba gratis 14 días</strong><span>Sin tarjeta. Cancela cuando quieras.</span></div>
+    <p class="caption" data-start="21" data-duration="3">Empieza hoy, en minutos.</p>
+  </section>
+</div>
+<script>
+  window.__flareDuration = 24;
+  var clips = Array.prototype.slice.call(document.querySelectorAll('.clip'));
+  var timelines = clips.map(function (clip) {
+    var dur = parseFloat(clip.dataset.duration);
+    var tl = gsap.timeline({ paused: true });
+    clip.querySelectorAll('[data-anim]').forEach(function (el) {
+      tl.fromTo(el, { opacity: 0, y: 40, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power3.out' }, 0);
+      tl.to(el, { y: -12, duration: Math.max(0.1, dur - 0.6), ease: 'none' }, 0.6);
+    });
+    return tl;
+  });
+  window.__flareSeek = function (t) {
+    t = Math.max(0, Math.min(window.__flareDuration, Number(t) || 0));
+    clips.forEach(function (clip, i) {
+      var start = parseFloat(clip.dataset.start), dur = parseFloat(clip.dataset.duration);
+      var p = t < start ? 0 : t >= start + dur ? 1 : (t - start) / dur;
+      timelines[i].progress(p);
+      clip.classList.toggle('active', t >= start && t < start + dur || (t === window.__flareDuration && i === clips.length - 1));
+    });
+  };
+  var params = new URLSearchParams(location.search);
+  window.__flareSeek(parseFloat(params.get('t') || '0'));
+</script>
+</body>
+</html>
