@@ -58,10 +58,42 @@ export function initSmoothScroll(): Lenis | null {
   return lenis;
 }
 
+/** Scroll programático que respeta Lenis (usado por nav, rail y CTAs). */
+export function scrollToId(id: string, offset = -72): void {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (lenis) lenis.scrollTo(el as HTMLElement, { offset, duration: 1.5 });
+  else el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/** Volver arriba sin pelear con Lenis. */
+export function scrollToTop(): void {
+  if (lenis) lenis.scrollTo(0, { duration: 1.4 });
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 export function destroySmoothScroll(): void {
   document.removeEventListener('click', onAnchorClick);
   lenis?.destroy();
   lenis = null;
+}
+
+/**
+ * Bloqueo de scroll real para overlays (modal del reel, menú móvil).
+ * `overflow: hidden` en <body> no frena a Lenis porque Lenis mueve
+ * window; hay que llamar a stop()/start() además de fijar el estilo.
+ */
+export function setScrollLocked(locked: boolean): void {
+  if (typeof document === 'undefined') return;
+  if (locked) {
+    lenis?.stop();
+    document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('lenis-stopped');
+  } else {
+    document.body.style.overflow = '';
+    document.documentElement.classList.remove('lenis-stopped');
+    lenis?.start();
+  }
 }
 
 // ---------- Cursor Scramble (§2 v01, versión propia) ----------

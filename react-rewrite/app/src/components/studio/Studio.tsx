@@ -930,7 +930,7 @@ export function Studio({ openTemplate }: StudioProps) {
         : { border: 'rgba(251,113,133,0.5)', color: '#FB7185', bg: 'rgba(251,113,133,0.10)' };
 
   return (
-    <section id="studio" className="mx-auto w-full max-w-[1240px] scroll-mt-24 px-4 pb-24 pt-16 sm:px-6">
+    <section id="studio-app" className="mx-auto w-full max-w-[1240px] scroll-mt-24 px-4 pb-24 pt-16 sm:px-6">
       <AuditStage scenes={scenes} templateSlug={template.slug} format={format} onAudit={setAudit} />
 
       <div className="mb-6">
