@@ -1103,7 +1103,6 @@ export function Studio({ openTemplate }: StudioProps) {
             } catch {
               args = {};
             }
-            setMessages((prev) => [...prev, thinkingMessage(`Usando ${toolName}…`)]);
             const result = execTool(toolName, args);
             let parsed: Record<string, unknown> = {};
             try {
