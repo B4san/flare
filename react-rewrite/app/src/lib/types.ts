@@ -11,6 +11,7 @@ export type AgentId =
   | 'qwen-code';
 
 export type ProviderId =
+  | 'flare-cloud'
   | 'openai'
   | 'anthropic'
   | 'gemini'

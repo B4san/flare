@@ -2,8 +2,10 @@
 //
 // Ventanas flotantes (arrastrables en escritorio, apiladas en móvil), con
 // TODA la funcionalidad vanilla: play/pausa/seek, 3 formatos, 3 ejemplos,
-// 6 agentes CLI, 13 proveedores (keys solo en localStorage), demo del
-// agente, export WebM real y storyboard.
+// 6 agentes CLI, 13 proveedores BYO (keys solo en localStorage) + Flare
+// Cloud: el agente real del Studio, con modelo Qwen Cloud incluido vía
+// proxy del servidor (/api/agent). Sin key del usuario; la key vive solo
+// en variables de entorno de Vercel.
 //
 // DIFERENCIAS CLAVE vs vanilla (lecciones R6):
 //  - Datos empaquetados en build (sin fetch, sin fallback silencioso).
@@ -15,6 +17,9 @@
 //    pasan (B9).
 //  - La simulación del agente APLICA arreglos reales en la sesión
 //    (acortar 1ª escena, extender captions) y el score sube de verdad (B4).
+//  - El agente REAL (Flare Cloud) usa las mismas herramientas contra el
+//    estado vivo del Studio; la simulación queda solo como respaldo si el
+//    modelo no responde.
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ChatStatus, UIMessage } from 'ai';
@@ -47,6 +52,12 @@ import {
   userTextMessage,
 } from '../../lib/agentMessages';
 import type { TodoItem } from '../../lib/agentMessages';
+import {
+  AGENT_TOOLS,
+  buildSystemPrompt,
+  historyToModelMessages,
+} from '../../lib/realAgent';
+import type { AgentSnapshot, AgentToolName } from '../../lib/realAgent';
 import { PreviewClip } from '../preview/PreviewClip';
 import { AuditStage } from './AuditStage';
 import { AgentOrb } from './AgentOrb';
@@ -189,7 +200,7 @@ const WIN_TITLES: Record<WinId, { title: string; sub: string }> = {
   preview: { title: 'Preview', sub: 'El anuncio, en vivo' },
   timeline: { title: 'Timeline', sub: 'Escenas y captions' },
   retention: { title: 'Retención', sub: 'Score medido en vivo' },
-  agent: { title: 'Agente', sub: 'BYO agente · BYO key' },
+  agent: { title: 'Agente', sub: 'Agente real · Qwen Cloud incluido' },
 };
 
 interface FloatWindowProps {
@@ -308,14 +319,15 @@ export function Studio({ openTemplate }: StudioProps) {
   const currentScene = scenes[currentSceneIdx] || scenes[0];
 
   // Proveedor (BYO key): config + mapa de keys por proveedor, solo localStorage.
+  // Default: Flare Cloud (agente real con Qwen Cloud incluido, sin key).
   const savedProvider = useRef(readJSON<{ provider?: ProviderId; baseUrl?: string; model?: string }>(LS_CONFIG));
   const savedKeys = useRef<Record<string, string>>(readJSON<Record<string, string>>(LS_KEYS) || {});
-  const [providerId, setProviderId] = useState<ProviderId>(() => savedProvider.current?.provider || 'openai');
+  const [providerId, setProviderId] = useState<ProviderId>(() => savedProvider.current?.provider || 'flare-cloud');
   const [providerBaseUrl, setProviderBaseUrl] = useState<string>(
-    () => savedProvider.current?.baseUrl || PROVIDERS.openai.baseUrl,
+    () => savedProvider.current?.baseUrl || PROVIDERS['flare-cloud'].baseUrl,
   );
   const [providerModel, setProviderModel] = useState<string>(
-    () => savedProvider.current?.model || PROVIDERS.openai.models[0],
+    () => savedProvider.current?.model || PROVIDERS['flare-cloud'].models[0],
   );
   const [providerKey, setProviderKey] = useState<string>(() => savedKeys.current[providerId] || '');
   const [providerSavedLabel, setProviderSavedLabel] = useState<string>('');
@@ -323,11 +335,21 @@ export function Studio({ openTemplate }: StudioProps) {
   const [agentStatus, setAgentStatus] = useState<AgentStatus>('inactivo');
   const [messages, setMessages] = useState<UIMessage[]>(() => [
     assistantTextMessage(
-      'Soy el agente de Flare. Puedo leer tu brief, analizar el score de retención y aplicar arreglos en el Studio. Pulsa «Simular agente trabajando» o escríbeme.',
+      'Soy el agente de Flare, con modelo real (Qwen Cloud, incluido: no necesitas key). Puedo leer el anuncio, analizar el score de retención y aplicar arreglos de verdad en el Studio. Escríbeme o pulsa «Agente: mejora el anuncio».',
     ),
   ]);
   const [chatStatus, setChatStatus] = useState<ChatStatus>('ready');
   const [simulating, setSimulating] = useState(false);
+  // Espejos para el bucle asíncrono del agente real (el closure del
+  // useCallback vería el estado viejo a mitad de turno).
+  const scenesRef = useRef(scenes);
+  scenesRef.current = scenes;
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  // Guarda síncrona de "agente ocupado" (el estado es asíncrono y el
+  // fallback a la simulación no puede fiarse del closure).
+  const agentBusyRef = useRef(false);
+  const agentAbortRef = useRef<AbortController | null>(null);
   const [logLines, setLogLines] = useState<LogLine[]>([]);
   const [brief, setBrief] = useState<{ brief: string; command: string } | null>(null);
   const [copyFeedback, setCopyFeedback] = useState('');
@@ -645,6 +667,11 @@ export function Studio({ openTemplate }: StudioProps) {
     else delete map[providerId];
     savedKeys.current = map;
     writeJSON(LS_KEYS, map);
+    if (PROVIDERS[providerId].hosted) {
+      setProviderSavedLabel('Guardado localmente · Flare Cloud, sin key: el modelo lo pone Flare.');
+      logLine('ok', `Proveedor guardado en este navegador: Flare Cloud (Qwen) · ${providerModel || 'sin modelo'}. Sin key: el modelo lo pone Flare.`, 'PROVEEDOR');
+      return;
+    }
     setProviderSavedLabel(
       `Guardado localmente · ${providerKey ? 'key guardada' : 'sin key'} — nunca sale de tu navegador.`,
     );
@@ -721,7 +748,8 @@ export function Studio({ openTemplate }: StudioProps) {
 
   /* ---------- Simulación del agente ---------- */
   const simulateAgent = useCallback(() => {
-    if (simulating) return;
+    if (agentBusyRef.current) return;
+    agentBusyRef.current = true;
     setSimulating(true);
     setChatStatus('streaming');
     const before = computeRetention(scenes, {
@@ -841,10 +869,319 @@ export function Studio({ openTemplate }: StudioProps) {
       );
       setAgentStatus('listo');
       setChatStatus('ready');
+      agentBusyRef.current = false;
       setSimulating(false);
       bringToFront('retention');
     });
-  }, [simulating, scenes, audit, format, templateId, template, seek, logLine]);
+  }, [scenes, audit, format, templateId, template, seek, logLine]);
+
+  /* ---------- Agente REAL (Flare Cloud / Qwen) ---------- */
+  // Bucle agentic contra /api/agent: el modelo decide con herramientas y
+  // cada herramienta se ejecuta aquí, contra el estado vivo del Studio.
+  // Si el proxy no responde o no está configurado, cae a la simulación
+  // (mismos arreglos reales, sin modelo) para no dejar el chat muerto.
+  const runRealAgent = useCallback(
+    async (instruction: string) => {
+      if (agentBusyRef.current) return;
+      agentBusyRef.current = true;
+      setSimulating(true);
+      setChatStatus('streaming');
+      const abort = new AbortController();
+      agentAbortRef.current = abort;
+      let currentScenes = cloneScenes(scenesRef.current);
+      let fixesApplied = false;
+
+      const scoreOf = (list: Scene[]) =>
+        computeRetention(list, {
+          safePoints: audit?.status === 'done' ? audit.safePoints : null,
+          safeFix,
+          format,
+        });
+      const scoreText = (r: RetentionResult) =>
+        `${r.total === null ? 'sin verificar' : `${r.total}/100`} (hook ${r.hook}/30 · captions ${r.captions}/25 · cortes ${r.cuts}/20 · CTA ${r.cta}/15 · safe ${r.safe === null ? '—' : `${r.safe}/10`})`;
+      const sceneSummary = (list: Scene[]) =>
+        list
+          .map(
+            (s, i) =>
+              `${i + 1}. «${s.name}» ${s.duration}s${s.caption ? ` · caption ${s.captionDuration}s` : ' · sin caption'}`,
+          )
+          .join('\n');
+
+      const snapshot = (): AgentSnapshot => ({
+        templateName: template.name,
+        product: template.product,
+        format,
+        totalDuration: totalDuration(currentScenes),
+        scenes: cloneScenes(currentScenes),
+        retention: scoreOf(currentScenes),
+        unsafeSceneNames:
+          audit?.status === 'done'
+            ? audit.scenes.filter((s) => !s.insideSafe).map((s) => `«${s.sceneName}»`)
+            : [],
+      });
+
+      // Ejecuta una llamada de herramienta del modelo y devuelve el texto
+      // que se le devuelve como resultado. Todo actúa sobre currentScenes
+      // (la verdad del turno) y refleja el cambio en el estado.
+      const execTool = (name: AgentToolName, args: Record<string, unknown>): string => {
+        if (name === 'get_score') {
+          const r = scoreOf(currentScenes);
+          return JSON.stringify({
+            score: scoreText(r),
+            items: r.items.map((i) => ({ label: i.label, pts: i.pts, max: i.max, pass: i.pass, fix: i.fix })),
+          });
+        }
+        if (name === 'list_scenes') {
+          return sceneSummary(currentScenes);
+        }
+        if (name === 'apply_fixes') {
+          const before = scoreOf(currentScenes);
+          const { scenes: fixed, fixes, notes } = applyAgentFixes(
+            currentScenes,
+            before,
+            audit?.status === 'done'
+              ? audit.scenes.filter((s) => !s.insideSafe).map((s) => `«${s.sceneName}»`)
+              : [],
+          );
+          if (!fixes.length) {
+            return JSON.stringify({ fixes: [], notes, score: scoreText(before), note: 'No había puntos débiles que corregir.' });
+          }
+          currentScenes = fixed;
+          setScenes(cloneScenes(fixed));
+          setTime(0);
+          timeRef.current = 0;
+          seek(0);
+          fixesApplied = true;
+          fixes.forEach((f) => logLine('edit', f, 'EDIT'));
+          notes.forEach((n) => logLine('warn', n, 'NOTA'));
+          const after = scoreOf(fixed);
+          return JSON.stringify({ fixes, notes, before: scoreText(before), after: scoreText(after) });
+        }
+        if (name === 'edit_scene') {
+          const idx = typeof args.scene_index === 'number' ? Math.floor(args.scene_index) - 1 : -1;
+          if (idx < 0 || idx >= currentScenes.length) {
+            return JSON.stringify({ error: `No hay escena ${args.scene_index}: el anuncio tiene ${currentScenes.length} escenas.` });
+          }
+          const next = cloneScenes(currentScenes);
+          const s = next[idx];
+          if (typeof args.duration === 'number') {
+            if (args.duration < 0.5 || args.duration > 10) {
+              return JSON.stringify({ error: 'La duración debe estar entre 0.5 y 10 segundos.' });
+            }
+            s.duration = args.duration;
+            s.captionDuration = Math.min(s.captionDuration, s.duration);
+          }
+          if (typeof args.caption === 'string') {
+            if (args.caption.length > 200) {
+              return JSON.stringify({ error: 'El caption supera los 200 caracteres.' });
+            }
+            s.caption = args.caption;
+            if (s.captionDuration === 0) s.captionDuration = Math.min(s.duration, 2);
+          }
+          if (typeof args.headline === 'string') {
+            if (args.headline.length > 120) {
+              return JSON.stringify({ error: 'El headline supera los 120 caracteres.' });
+            }
+            s.headline = args.headline;
+          }
+          let t = 0;
+          next.forEach((sc) => {
+            sc.start = t;
+            t += sc.duration;
+          });
+          currentScenes = next;
+          setScenes(cloneScenes(next));
+          fixesApplied = true;
+          const after = scoreOf(next);
+          logLine('edit', `Editada «${s.name}» (duración ${s.duration}s).`, 'EDIT');
+          return JSON.stringify({
+            scene: `${idx + 1}. «${s.name}» duración ${s.duration}s · caption «${s.caption}»`,
+            score: scoreText(after),
+          });
+        }
+        if (name === 'generate_brief') {
+          const built = buildBrief({
+            scenes: currentScenes,
+            template,
+            format,
+            agentId,
+            providerId,
+            providerBaseUrl,
+            providerModel,
+            retention: scoreOf(currentScenes),
+            unsafeSceneIds,
+          });
+          setBrief(built);
+          logLine('ok', `Brief generado para ${AGENTS[agentId].name} · proveedor ${PROVIDERS[providerId].name}.`, 'BRIEF');
+          return JSON.stringify({ ok: true, note: 'Brief generado en el panel «Brief para tu agente».' });
+        }
+        if (name === 'export_video') {
+          if (exporting) {
+            return JSON.stringify({ ok: false, note: 'Ya hay una exportación en curso.' });
+          }
+          setExporting(true);
+          setExportStatus('Preparando exportación…');
+          setPlaying(false);
+          void exportWebM(currentScenes, format, templateId, {
+            onStatus: setExportStatus,
+            onLog: logLine,
+            onSeek: seek,
+            onDone: () => setExporting(false),
+            onError: (text) => {
+              setExportStatus(text);
+              setExporting(false);
+            },
+          });
+          return JSON.stringify({ ok: true, note: 'Exportación iniciada: el WebM se descargará en el navegador.' });
+        }
+        return JSON.stringify({ error: `Herramienta desconocida: ${name}` });
+      };
+
+      try {
+        const system = buildSystemPrompt(snapshot());
+        const history = [
+          ...historyToModelMessages(messagesRef.current),
+          { role: 'user', content: instruction },
+        ];
+        type ModelMessage = {
+          role: string;
+          content?: string;
+          tool_calls?: { id: string; type: 'function'; function: { name: string; arguments: string } }[];
+          tool_call_id?: string;
+        };
+        let convo: ModelMessage[] = [{ role: 'system', content: system }, ...history];
+        let done = false;
+        for (let turn = 0; turn < 6 && !done; turn++) {
+          setAgentStatus(turn === 0 ? 'pensando' : 'editando');
+          const resp = await fetch('/api/agent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: convo, tools: AGENT_TOOLS, model: providerModel }),
+            signal: abort.signal,
+          });
+          const data: unknown = await resp.json().catch(() => null);
+          if (!resp.ok) {
+            const msg =
+              data !== null && typeof data === 'object' && 'error' in data &&
+              data.error !== null && typeof data.error === 'object' && 'message' in data.error
+                ? String(data.error.message)
+                : `El servidor respondió ${resp.status}.`;
+            throw new Error(msg);
+          }
+          const choice =
+            data !== null && typeof data === 'object' && 'choices' in data &&
+            Array.isArray(data.choices) && data.choices[0] !== undefined &&
+            typeof data.choices[0] === 'object' && data.choices[0] !== null &&
+            'message' in data.choices[0]
+              ? (data.choices[0].message as { content?: unknown; tool_calls?: ModelMessage['tool_calls'] })
+              : null;
+          if (!choice) throw new Error('El modelo no devolvió respuesta.');
+          const calls = Array.isArray(choice.tool_calls) ? choice.tool_calls : [];
+          if (calls.length === 0) {
+            const text = typeof choice.content === 'string' ? choice.content.trim() : '';
+            setMessages((prev) => [
+              ...prev,
+              assistantTextMessage(text || 'Listo. Revisa la Timeline y el panel de Retención.'),
+            ]);
+            done = true;
+            break;
+          }
+          convo = [
+            ...convo,
+            {
+              role: 'assistant',
+              content: typeof choice.content === 'string' ? choice.content : '',
+              tool_calls: calls,
+            },
+          ];
+          const toolResults: ModelMessage[] = [];
+          for (const call of calls) {
+            const toolName = call.function?.name as AgentToolName;
+            let args: Record<string, unknown> = {};
+            try {
+              args = JSON.parse(call.function?.arguments || '{}') as Record<string, unknown>;
+            } catch {
+              args = {};
+            }
+            setMessages((prev) => [...prev, thinkingMessage(`Usando ${toolName}…`)]);
+            const result = execTool(toolName, args);
+            let parsed: Record<string, unknown> = {};
+            try {
+              parsed = JSON.parse(result) as Record<string, unknown>;
+            } catch {
+              parsed = {};
+            }
+            if (toolName === 'apply_fixes' && Array.isArray(parsed.fixes) && parsed.fixes.length) {
+              const fixes = parsed.fixes as string[];
+              setMessages((prev) => [
+                ...prev,
+                todoMessage([{ content: 'Aplicar arreglos del motor de retención', status: 'completed' }]),
+                editMessage('scenes.json (sesión)', 'score anterior', 'score nuevo'),
+                assistantTextMessage(`Apliqué ${fixes.length} arreglo(s) en la sesión:\n- ${fixes.join('\n- ')}`),
+              ]);
+            }
+            if (toolName === 'edit_scene' && typeof parsed.scene === 'string' && !parsed.error) {
+              setMessages((prev) => [...prev, editMessage('scenes.json (sesión)', 'escena anterior', parsed.scene as string)]);
+            }
+            if (toolName === 'get_score' && typeof parsed.score === 'string') {
+              setMessages((prev) => [...prev, thinkingMessage(`Score actual: ${parsed.score}.`)]);
+            }
+            toolResults.push({ role: 'tool', tool_call_id: call.id, content: result });
+          }
+          convo = [...convo, ...toolResults];
+        }
+        if (!done) {
+          setMessages((prev) => [
+            ...prev,
+            assistantTextMessage('Hice lo que pude en este turno: revisa la Timeline y el panel de Retención para ver los cambios.'),
+          ]);
+        }
+        logLine('ok', `Agente real: score ${scoreText(scoreOf(currentScenes))}.`, 'AGENTE');
+        if (fixesApplied) {
+          bringToFront('retention');
+          seek(0);
+        }
+      } catch (err) {
+        if (abort.signal.aborted) {
+          setMessages((prev) => [...prev, assistantTextMessage('Parado.')]);
+        } else {
+          const detail = err instanceof Error ? err.message : 'Error desconocido.';
+          logLine('warn', `Agente real no disponible (${detail}): uso la simulación.`, 'AGENTE');
+          setMessages((prev) => [
+            ...prev,
+            assistantTextMessage(`No pude llamar al modelo real (${detail}). Te muestro el flujo simulado con los mismos arreglos reales.`),
+          ]);
+          agentBusyRef.current = false;
+          setSimulating(false);
+          setChatStatus('ready');
+          simulateAgent();
+          return;
+        }
+      } finally {
+        if (agentAbortRef.current === abort) agentAbortRef.current = null;
+      }
+      agentBusyRef.current = false;
+      setSimulating(false);
+      setChatStatus('ready');
+      setAgentStatus('listo');
+    },
+    [
+      audit, format, template, templateId, agentId, providerId, providerBaseUrl,
+      providerModel, unsafeSceneIds, safeFix, exporting, logLine, seek,
+      simulateAgent,
+    ],
+  );
+
+  const handleImproveClick = useCallback(() => {
+    if (agentBusyRef.current) return;
+    const instruction =
+      'Analiza el score de retención del anuncio y aplica los arreglos que hagan falta, luego dime el score antes y después.';
+    setMessages((prev) => [
+      ...prev,
+      userTextMessage('Mejora el anuncio: analiza el score y aplica los arreglos que hagan falta.'),
+    ]);
+    void runRealAgent(instruction);
+  }, [runRealAgent]);
 
   /* ---------- Ventanas ---------- */
   const bringToFront = useCallback((id: WinId) => {
@@ -866,6 +1203,12 @@ export function Studio({ openTemplate }: StudioProps) {
     (message: { role: 'user'; content: string }) => {
       const text = message.content;
       setMessages((prev) => [...prev, userTextMessage(text)]);
+      // Flare Cloud: el modelo real responde (con herramientas). Los demás
+      // proveedores BYO aún no llaman a ningún modelo: respuestas por clave.
+      if (providerId === 'flare-cloud') {
+        void runRealAgent(text);
+        return;
+      }
       const low = text.toLowerCase();
       if (low.includes('brief')) {
         generateBrief();
@@ -889,12 +1232,12 @@ export function Studio({ openTemplate }: StudioProps) {
         setMessages((prev) => [
           ...prev,
           assistantTextMessage(
-            'Puedo ayudarte con el anuncio que tienes abierto: dime «genera el brief», «exporta el vídeo» o «acorta la primera escena», o pulsa «Simular agente trabajando» para ver el flujo completo.',
+            'Puedo ayudarte con el anuncio que tienes abierto: dime «genera el brief», «exporta el vídeo» o «acorta la primera escena», o pulsa «Agente: mejora el anuncio». (Consejo: cambia a Flare Cloud para hablar con el modelo real, sin key.)',
           ),
         ]);
       }
     },
-    [generateBrief, handleExportWebM, scenes, retention, logLine],
+    [generateBrief, handleExportWebM, scenes, retention, logLine, providerId, runRealAgent],
   );
 
   const selected = scenes[Math.min(selectedScene, scenes.length - 1)] || scenes[0];
@@ -1295,11 +1638,11 @@ export function Studio({ openTemplate }: StudioProps) {
             </div>
             <button
               type="button"
-              onClick={simulateAgent}
+              onClick={handleImproveClick}
               disabled={simulating}
               className="bg-flare shrink-0 rounded-full px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
             >
-              {simulating ? 'Agente trabajando…' : '▶ Simular agente trabajando'}
+              {simulating ? 'Agente trabajando…' : '▶ Agente: mejora el anuncio'}
             </button>
           </div>
           <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_360px]">
@@ -1308,7 +1651,10 @@ export function Studio({ openTemplate }: StudioProps) {
                 messages={messages}
                 status={chatStatus}
                 onSend={handleChatSend}
-                onStop={() => setChatStatus('ready')}
+                onStop={() => {
+                  agentAbortRef.current?.abort();
+                  setChatStatus('ready');
+                }}
                 suggestions={chatSuggestions}
               />
             </div>
@@ -1329,7 +1675,9 @@ export function Studio({ openTemplate }: StudioProps) {
                 )}
               </div>
               <div className="mt-3 rounded-[14px] border border-white/[0.06] bg-[#0A0A0F]/50 p-3">
-                <p className="text-sm font-bold text-white">Proveedor de modelo (BYO key)</p>
+                <p className="text-sm font-bold text-white">
+                  {providerDef.hosted ? 'Modelo del agente (incluido)' : 'Proveedor de modelo (BYO key)'}
+                </p>
                 <label htmlFor="provider-select" className="mt-2 block text-[11px] uppercase tracking-wider text-[#82828F]">
                   Proveedor
                 </label>
@@ -1345,54 +1693,65 @@ export function Studio({ openTemplate }: StudioProps) {
                     </option>
                   ))}
                 </select>
-                <label htmlFor="provider-baseurl" className="mt-2 block text-[11px] uppercase tracking-wider text-[#82828F]">
-                  Base URL
-                </label>
-                <input
-                  id="provider-baseurl"
-                  value={providerBaseUrl}
-                  onChange={(e) => setProviderBaseUrl(e.target.value)}
-                  placeholder={providerDef.custom ? 'https://tu-endpoint.com/v1' : providerDef.baseUrl}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#0A0A0F] px-3 py-2 font-mono text-xs text-white"
-                />
-                <label htmlFor="provider-model" className="mt-2 block text-[11px] uppercase tracking-wider text-[#82828F]">
-                  Modelo
-                </label>
-                <input
-                  id="provider-model"
-                  value={providerModel}
-                  onChange={(e) => setProviderModel(e.target.value)}
-                  placeholder={providerDef.custom ? 'nombre-del-modelo' : providerDef.models[0] || ''}
-                  list="flare-models"
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#0A0A0F] px-3 py-2 font-mono text-xs text-white"
-                />
-                <datalist id="flare-models">
-                  {providerDef.models.map((m) => (
-                    <option key={m} value={m} />
-                  ))}
-                </datalist>
-                <label htmlFor="provider-key" className="mt-2 block text-[11px] uppercase tracking-wider text-[#82828F]">
-                  API key {providerDef.needsKey ? '(requerida)' : '(opcional en local)'}
-                </label>
-                <input
-                  id="provider-key"
-                  type="password"
-                  value={providerKey}
-                  onChange={(e) => setProviderKey(e.target.value)}
-                  placeholder={providerDef.local ? 'Opcional en local — puede ir vacía' : 'sk-…'}
-                  autoComplete="off"
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#0A0A0F] px-3 py-2 font-mono text-xs text-white"
-                />
-                {providerDef.local && (
-                  <p className="mt-1 text-[11px] text-[#9A9AA8]">
-                    Corre en tu máquina: la key es opcional y nunca sale de tu navegador.
+                {providerDef.hosted ? (
+                  <p className="mt-2 text-[11px] leading-relaxed text-[#9A9AA8]">
+                    Flare Cloud (Qwen) — el modelo lo pone Flare, sin key. Tus
+                    mensajes van a nuestro servidor y de ahí a Qwen Cloud; la
+                    key nunca sale del servidor. Si prefieres traer tu propia
+                    key, elige otro proveedor abajo.
                   </p>
-                )}
-                {providerDef.custom && (
-                  <p className="mt-1 text-[11px] text-[#9A9AA8]">
-                    Cualquier endpoint compatible con la API de OpenAI: pon su base URL y su
-                    modelo.
-                  </p>
+                ) : (
+                  <>
+                    <label htmlFor="provider-baseurl" className="mt-2 block text-[11px] uppercase tracking-wider text-[#82828F]">
+                      Base URL
+                    </label>
+                    <input
+                      id="provider-baseurl"
+                      value={providerBaseUrl}
+                      onChange={(e) => setProviderBaseUrl(e.target.value)}
+                      placeholder={providerDef.custom ? 'https://tu-endpoint.com/v1' : providerDef.baseUrl}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#0A0A0F] px-3 py-2 font-mono text-xs text-white"
+                    />
+                    <label htmlFor="provider-model" className="mt-2 block text-[11px] uppercase tracking-wider text-[#82828F]">
+                      Modelo
+                    </label>
+                    <input
+                      id="provider-model"
+                      value={providerModel}
+                      onChange={(e) => setProviderModel(e.target.value)}
+                      placeholder={providerDef.custom ? 'nombre-del-modelo' : providerDef.models[0] || ''}
+                      list="flare-models"
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#0A0A0F] px-3 py-2 font-mono text-xs text-white"
+                    />
+                    <datalist id="flare-models">
+                      {providerDef.models.map((m) => (
+                        <option key={m} value={m} />
+                      ))}
+                    </datalist>
+                    <label htmlFor="provider-key" className="mt-2 block text-[11px] uppercase tracking-wider text-[#82828F]">
+                      API key {providerDef.needsKey ? '(requerida)' : '(opcional en local)'}
+                    </label>
+                    <input
+                      id="provider-key"
+                      type="password"
+                      value={providerKey}
+                      onChange={(e) => setProviderKey(e.target.value)}
+                      placeholder={providerDef.local ? 'Opcional en local — puede ir vacía' : 'sk-…'}
+                      autoComplete="off"
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#0A0A0F] px-3 py-2 font-mono text-xs text-white"
+                    />
+                    {providerDef.local && (
+                      <p className="mt-1 text-[11px] text-[#9A9AA8]">
+                        Corre en tu máquina: la key es opcional y nunca sale de tu navegador.
+                      </p>
+                    )}
+                    {providerDef.custom && (
+                      <p className="mt-1 text-[11px] text-[#9A9AA8]">
+                        Cualquier endpoint compatible con la API de OpenAI: pon su base URL y su
+                        modelo.
+                      </p>
+                    )}
+                  </>
                 )}
                 <button
                   type="button"

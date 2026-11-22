@@ -123,9 +123,18 @@ export interface ProviderDef {
   needsKey: boolean;
   local?: boolean;
   custom?: boolean;
+  /** Proveedor alojado: el modelo lo pone Flare (proxy + key en el servidor), sin key del usuario. */
+  hosted?: boolean;
 }
 
 export const PROVIDERS: Record<ProviderId, ProviderDef> = {
+  'flare-cloud': {
+    name: 'Flare Cloud (Qwen)',
+    baseUrl: '/api/agent',
+    models: ['qwen4-max'],
+    needsKey: false,
+    hosted: true,
+  },
   openai: {
     name: 'OpenAI',
     baseUrl: 'https://api.openai.com/v1',
@@ -210,6 +219,7 @@ export const PROVIDERS: Record<ProviderId, ProviderDef> = {
 };
 
 export const PROVIDER_ORDER: ProviderId[] = [
+  'flare-cloud',
   'openai',
   'anthropic',
   'gemini',
